@@ -1,47 +1,93 @@
-# Svelte + TS + Vite
+# TourGraph
 
-This template should help get you started developing with Svelte and TypeScript in Vite.
+PWA offline-first pour naviguer dans un parcours touristique organisé en **zones** et en **graphe de stops** — avec géolocalisation, suggestions classées par proximité, et notifications de proximité en mode tour.
 
-## Recommended IDE Setup
+Bootstrap inclus : un parcours complet à New York (`src/data/nyc.json`).
 
-[VS Code](https://code.visualstudio.com/) + [Svelte](https://marketplace.visualstudio.com/items?itemName=svelte.svelte-vscode).
+## Fonctionnalités
 
-## Need an official Svelte framework?
+- **Map** — carte Leaflet avec marqueurs par zone, bottom sheet de suggestions, contrôles du mode tour.
+- **Graph** — vue verticale du parcours zone par zone : stops, branches (forks nommés) et connecteurs textuels entre stops.
+- **Edit** — CRUD complet (trips, zones, stops), import/export JSON, reset au bootstrap.
+- **Mode Tour** — wake lock + notifications throttlées (3 min) quand le top stop change. Notifications passent par le service worker (obligatoire sur Android Chrome).
+- **PWA** — installable, cache des tuiles OSM (CacheFirst, 30 jours), fonctionne offline une fois la zone visitée.
 
-Check out [SvelteKit](https://github.com/sveltejs/kit#readme), which is also powered by Vite. Deploy anywhere with its serverless-first approach and adapt to various platforms, with out of the box support for TypeScript, SCSS, and Less, and easily-added support for mdsvex, GraphQL, PostCSS, Tailwind CSS, and more.
+## Stack
 
-## Technical considerations
+- **Svelte 5** (runes) + TypeScript + Vite 8
+- **Leaflet** pour la carte
+- **vite-plugin-pwa** (Workbox) — service worker et manifest
+- **Vitest** + jsdom pour les tests
 
-**Why use this over SvelteKit?**
+## Démarrage
 
-- It brings its own routing solution which might not be preferable for some users.
-- It is first and foremost a framework that just happens to use Vite under the hood, not a Vite app.
-
-This template contains as little as possible to get started with Vite + TypeScript + Svelte, while taking into account the developer experience with regards to HMR and intellisense. It demonstrates capabilities on par with the other `create-vite` templates and is a good starting point for beginners dipping their toes into a Vite + Svelte project.
-
-Should you later need the extended capabilities and extensibility provided by SvelteKit, the template has been structured similarly to SvelteKit so that it is easy to migrate.
-
-**Why `global.d.ts` instead of `compilerOptions.types` inside `jsconfig.json` or `tsconfig.json`?**
-
-Setting `compilerOptions.types` shuts out all other types not explicitly listed in the configuration. Using triple-slash references keeps the default TypeScript setting of accepting type information from the entire workspace, while also adding `svelte` and `vite/client` type information.
-
-**Why include `.vscode/extensions.json`?**
-
-Other templates indirectly recommend extensions via the README, but this file allows VS Code to prompt the user to install the recommended extension upon opening the project.
-
-**Why enable `allowJs` in the TS template?**
-
-While `allowJs: false` would indeed prevent the use of `.js` files in the project, it does not prevent the use of JavaScript syntax in `.svelte` files. In addition, it would force `checkJs: false`, bringing the worst of both worlds: not being able to guarantee the entire codebase is TypeScript, and also having worse typechecking for the existing JavaScript. In addition, there are valid use cases in which a mixed codebase may be relevant.
-
-**Why is HMR not preserving my local component state?**
-
-HMR state preservation comes with a number of gotchas! It has been disabled by default in both `svelte-hmr` and `@sveltejs/vite-plugin-svelte` due to its often surprising behavior. You can read the details [here](https://github.com/rixo/svelte-hmr#svelte-hmr).
-
-If you have state that's important to retain within a component, consider creating an external store which would not be replaced by HMR.
-
-```ts
-// store.ts
-// An extremely simple external store
-import { writable } from 'svelte/store'
-export default writable(0)
+```bash
+npm install
+npm run dev
 ```
+
+Le serveur dev tourne en HTTPS (`@vitejs/plugin-basic-ssl`) car la Geolocation API et les notifications SW exigent un secure context. Le navigateur affichera un avertissement de certificat auto-signé — accepte-le.
+
+### Autres commandes
+
+```bash
+npm run build       # build production
+npm run preview     # prévisualise le build
+npm run check       # svelte-check + tsc
+npx vitest          # lance les tests
+```
+
+## Modèle de données
+
+```
+AppState
+└─ trips: Trip[]
+   └─ zones: Zone[]      (couleur, ordre)
+      └─ stops: Stop[]   (lat/lng, hours, tags, edges, branches)
+```
+
+- `Trip.visited[]` — IDs des stops visités, dans l'ordre.
+- `Stop.edges[]` — IDs de stops accessibles depuis ce stop (cross-zone autorisé) — utilisé pour booster le score des suggestions.
+- `Stop.branches[]` — forks nommés affichés dans la vue graph.
+- `Stop.hours` — `null` = ouvert tout le temps, sinon `{ open, close, days[] }`.
+
+État persisté dans `localStorage` (clé `tourapp`). Au premier lancement, `src/data/nyc.json` est chargé. **Le localStorage prend le pas sur le bootstrap** — pour récupérer les mises à jour de `nyc.json`, utiliser le bouton Reset dans la vue Edit.
+
+## Algorithme de suggestion
+
+Pour chaque stop non visité et ouvert aujourd'hui :
+
+```
+score = 1 / (distanceKm + 0.01)
+       × 1.2 si edge depuis le dernier stop visité
+       × 1.1 si même zone que le dernier stop visité
+```
+
+Les stops ouverts maintenant passent avant les fermés. Implémentation : `src/lib/suggestions.ts`.
+
+## Structure
+
+```
+src/
+├─ App.svelte              # shell + tabs (map / graph / edit)
+├─ main.ts                 # mount + enregistrement SW
+├─ components/             # TabBar, GraphStop, StopBottomSheet, SuggestionChip
+├─ views/                  # MapView, GraphView, EditView
+├─ stores/
+│  ├─ app.svelte.ts        # state global ($state) + helpers de mutation
+│  └─ tourMode.svelte.ts   # mode tour, notifs SW, wake lock
+├─ lib/
+│  ├─ types.ts
+│  ├─ geo.ts               # haversine, walkMinutes
+│  ├─ suggestions.ts
+│  └─ storage.ts           # load/save localStorage
+└─ data/nyc.json           # parcours bootstrap
+```
+
+## Notes Android
+
+Sur Android Chrome, `new Notification()` lève "Illegal constructor" quand l'app tourne dans un onglet. Toutes les notifications passent par `registration.showNotification()`. L'enregistrement SW est pré-chauffé au load du module pour que `serviceWorker.ready` soit déjà résolu au moment où l'utilisateur interagit. Voir `src/stores/tourMode.svelte.ts`.
+
+## Scripts utilitaires
+
+`scripts/geocode-stops.mjs` — script Node one-shot pour remplir les `lat/lng` manquants sur les stops via Nominatim. Hors build.

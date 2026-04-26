@@ -1,5 +1,6 @@
 <script lang="ts">
   import TabBar from './components/TabBar.svelte'
+  import Toaster from './components/Toaster.svelte'
   import MapView from './views/MapView.svelte'
   import GraphView from './views/GraphView.svelte'
   import EditView from './views/EditView.svelte'
@@ -18,6 +19,7 @@
     {/if}
   </main>
   <TabBar active={activeTab} onChange={(tab) => (activeTab = tab)} />
+  <Toaster />
 </div>
 
 <style>

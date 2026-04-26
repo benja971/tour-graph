@@ -5,6 +5,7 @@
   import { activeTripStore } from '../stores/app.svelte'
   import { computeSuggestions } from '../lib/suggestions'
   import { tourState, startTour, stopTour, maybeNotify } from '../stores/tourMode.svelte'
+  import { toastSuccess, toastError } from '../stores/toast.svelte'
   import type { Stop } from '../lib/types'
   import SuggestionChip from '../components/SuggestionChip.svelte'
   import StopBottomSheet from '../components/StopBottomSheet.svelte'
@@ -135,24 +136,23 @@
   })
 
   let tourBusy = $state(false)
-  let tourMsg = $state<string | null>(null)
 
   async function toggleTour() {
     if (tourBusy) return
     tourBusy = true
-    tourMsg = null
     try {
       if (tourState.active) {
         await stopTour()
+        toastSuccess('Mode Tour arrêté')
       } else {
         const r = await startTour()
-        if (!r.ok) tourMsg = r.error ?? 'Erreur'
+        if (!r.ok) toastError(r.error ?? 'Erreur démarrage tour')
+        else toastSuccess('Mode Tour activé')
       }
     } catch (e) {
-      tourMsg = String(e)
+      toastError(String(e))
     } finally {
       tourBusy = false
-      setTimeout(() => (tourMsg = null), 4000)
     }
   }
 
@@ -186,9 +186,6 @@
     </button>
   </header>
 
-  {#if tourMsg}
-    <div class="tour-msg">{tourMsg}</div>
-  {/if}
 
   {#if suggestions.length > 0}
     <div class="chips">
@@ -280,24 +277,6 @@
   }
   .tour-btn:disabled { opacity: 0.5; cursor: wait; }
 
-  .tour-msg {
-    position: absolute;
-    top: 64px; left: 50%;
-    transform: translateX(-50%);
-    background: var(--accent-soft);
-    color: var(--accent);
-    padding: 8px 16px;
-    border-radius: 10px;
-    border: 1px solid rgba(238,53,46,0.22);
-    font-size: 12px;
-    font-weight: 600;
-    z-index: 1200;
-    animation: tour-msg-in 0.2s ease;
-  }
-  @keyframes tour-msg-in {
-    from { opacity: 0; transform: translate(-50%, -8px); }
-    to   { opacity: 1; transform: translate(-50%, 0); }
-  }
   .hdr-eyebrow {
     font-family: var(--font-mono);
     font-size: 9px;

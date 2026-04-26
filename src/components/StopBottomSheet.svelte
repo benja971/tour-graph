@@ -2,6 +2,7 @@
   import type { Stop } from '../lib/types'
   import { navigateUrl, walkMinutes, haversineKm } from '../lib/geo'
   import { markVisited, activeTripStore } from '../stores/app.svelte'
+  import { toastSuccess } from '../stores/toast.svelte'
 
   let {
     stop,
@@ -59,7 +60,10 @@
   }
 
   function handleVisited() {
-    if (trip) markVisited(stop.id)
+    if (trip) {
+      markVisited(stop.id)
+      toastSuccess(`✓ ${stop.name} marqué visité`)
+    }
     onClose()
   }
 </script>

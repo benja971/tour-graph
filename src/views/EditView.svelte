@@ -1,6 +1,7 @@
 <script lang="ts">
   import { activeTripStore, upsertZone, deleteZone, upsertStop, deleteStop, importTrip, resetToBootstrap } from '../stores/app.svelte'
   import { fireTestNotification } from '../stores/tourMode.svelte'
+  import { toastSuccess, toastError } from '../stores/toast.svelte'
   import type { Zone, Stop, Suggestion } from '../lib/types'
 
   const trip = $derived(activeTripStore())
@@ -23,6 +24,7 @@
 
   function saveZone() {
     if (!trip || !zoneFormName.trim()) return
+    const isNew = !editingZone
     const zone: Zone = {
       id: editingZone?.id ?? zoneFormName.toLowerCase().replace(/\s+/g, '-') + '-' + Date.now(),
       name: zoneFormName.trim(),
@@ -31,15 +33,18 @@
     }
     upsertZone(trip.id, zone)
     showZoneForm = false
+    toastSuccess(isNew ? `Zone "${zone.name}" créée` : `Zone "${zone.name}" mise à jour`)
   }
 
   function removeZone(zoneId: string) {
     if (!trip) return
     const zone = trip.zones.find(z => z.id === zoneId)
-    if (zone && zone.stops.length > 0) {
+    if (!zone) return
+    if (zone.stops.length > 0) {
       if (!confirm(`Supprimer "${zone.name}" et ses ${zone.stops.length} stops ?`)) return
     }
     deleteZone(trip.id, zoneId)
+    toastSuccess(`Zone "${zone.name}" supprimée`)
   }
 
   // Stop form
@@ -78,7 +83,8 @@
     if (!trip || !selectedEditZoneId || !stopForm.name.trim()) return
     const lat = parseFloat(stopForm.lat)
     const lng = parseFloat(stopForm.lng)
-    if (isNaN(lat) || isNaN(lng)) { alert('Coordonnées invalides'); return }
+    if (isNaN(lat) || isNaN(lng)) { toastError('Coordonnées invalides'); return }
+    const isNew = !editingStop
     const stop: Stop = {
       id: editingStop?.id ?? stopForm.name.toLowerCase().replace(/\s+/g, '-') + '-' + Date.now(),
       name: stopForm.name.trim(), desc: stopForm.desc.trim(), lat, lng,
@@ -94,11 +100,14 @@
     }
     upsertStop(trip.id, selectedEditZoneId, stop)
     showStopForm = false
+    toastSuccess(isNew ? `Stop "${stop.name}" créé` : `Stop "${stop.name}" mis à jour`)
   }
 
   function removeStop(zoneId: string, stopId: string) {
     if (!trip) return
+    const stop = trip.zones.find(z => z.id === zoneId)?.stops.find(s => s.id === stopId)
     deleteStop(trip.id, zoneId, stopId)
+    if (stop) toastSuccess(`Stop "${stop.name}" supprimé`)
   }
 
   function exportTrip() {
@@ -108,6 +117,7 @@
     const a = document.createElement('a')
     a.href = url; a.download = `${trip.id}-export.json`; a.click()
     URL.revokeObjectURL(url)
+    toastSuccess(`Exporté · ${trip.id}-export.json`)
   }
 
   let testMsg = $state<string | null>(null)
@@ -147,10 +157,15 @@
     reader.onload = ev => {
       try {
         const data = JSON.parse(ev.target!.result as string)
-        if (!data.id || !data.zones) { alert('JSON invalide — il manque "id" ou "zones"'); return }
+        if (!data.id || !data.zones) {
+          toastError('JSON invalide — il manque "id" ou "zones"')
+          return
+        }
         importTrip(data)
-        alert(`Trip "${data.name}" importé.`)
-      } catch { alert('Impossible de lire le fichier JSON.') }
+        toastSuccess(`Trip "${data.name}" importé`)
+      } catch {
+        toastError('Impossible de lire le fichier JSON')
+      }
     }
     reader.readAsText(file)
   }
@@ -275,7 +290,7 @@
         </label>
         <h3>Réinitialiser</h3>
         <p>Recharge les données NYC livrées avec l'app. Efface tes modifications et tes stops visités.</p>
-        <button class="btn-danger" onclick={() => { if (confirm('Effacer toutes les données et recharger NYC par défaut ?')) resetToBootstrap() }}>
+        <button class="btn-danger" onclick={() => { if (confirm('Effacer toutes les données et recharger NYC par défaut ?')) { resetToBootstrap(); toastSuccess('Données NYC rechargées') } }}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
           Réinitialiser NYC
         </button>

@@ -134,15 +134,22 @@
 
   <div class="tab-content">
     {#if activeSubTab === 'zones'}
-      <button class="btn-add" onclick={() => openZoneForm()}>+ Nouvelle zone</button>
+      <button class="btn-add" onclick={() => openZoneForm()}>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+        Nouvelle zone
+      </button>
       {#if trip}
         {#each trip.zones as zone}
           <div class="list-item">
             <span class="zone-dot" style="background:{zone.color}"></span>
             <span class="item-name">{zone.name}</span>
             <span class="item-meta">{zone.stops.length} stops</span>
-            <button class="btn-icon" onclick={() => openZoneForm(zone)}>✏️</button>
-            <button class="btn-icon" onclick={() => removeZone(zone.id)}>🗑</button>
+            <button class="btn-icon" aria-label="Modifier" onclick={() => openZoneForm(zone)}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3 21 8 8 21H3v-5L16 3Z"/><path d="m13 6 5 5"/></svg>
+            </button>
+            <button class="btn-icon btn-icon-danger" aria-label="Supprimer" onclick={() => removeZone(zone.id)}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+            </button>
           </div>
         {/each}
       {/if}
@@ -170,13 +177,20 @@
         {#if selectedEditZoneId}
           {@const zone = trip.zones.find(z => z.id === selectedEditZoneId)}
           {#if zone}
-            <button class="btn-add" onclick={() => openStopForm(zone.id)}>+ Nouveau stop</button>
+            <button class="btn-add" onclick={() => openStopForm(zone.id)}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+              Nouveau stop
+            </button>
             {#each zone.stops as stop}
               <div class="list-item">
                 <span class="item-name">{stop.name}</span>
                 <span class="item-meta">{stop.lat.toFixed(4)}, {stop.lng.toFixed(4)}</span>
-                <button class="btn-icon" onclick={() => openStopForm(zone.id, stop)}>✏️</button>
-                <button class="btn-icon" onclick={() => removeStop(zone.id, stop.id)}>🗑</button>
+                <button class="btn-icon" aria-label="Modifier" onclick={() => openStopForm(zone.id, stop)}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3 21 8 8 21H3v-5L16 3Z"/><path d="m13 6 5 5"/></svg>
+                </button>
+                <button class="btn-icon btn-icon-danger" aria-label="Supprimer" onclick={() => removeStop(zone.id, stop.id)}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+                </button>
               </div>
             {/each}
           {/if}
@@ -217,49 +231,257 @@
       <div class="data-section">
         <h3>Export</h3>
         <p>Télécharge le JSON du trip actif pour le modifier sur desktop ou le transférer.</p>
-        <button class="btn-primary" onclick={exportTrip}>⬇ Exporter trip actif</button>
+        <button class="btn-primary" onclick={exportTrip}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v14M5 12l7 7 7-7M5 21h14"/></svg>
+          Exporter trip actif
+        </button>
         <h3>Import</h3>
         <p>Remplace le trip actif avec un fichier JSON. Le fichier doit avoir "id" et "zones".</p>
-        <label class="btn-secondary file-label">⬆ Importer JSON<input type="file" accept=".json" onchange={handleImport} style="display:none" /></label>
+        <label class="btn-secondary file-label">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21V7M5 12l7-7 7 7M5 3h14"/></svg>
+          Importer JSON
+          <input type="file" accept=".json" onchange={handleImport} style="display:none" />
+        </label>
         <h3>Réinitialiser</h3>
         <p>Recharge les données NYC livrées avec l'app. Efface tes modifications et tes stops visités.</p>
-        <button class="btn-danger" onclick={() => { if (confirm('Effacer toutes les données et recharger NYC par défaut ?')) resetToBootstrap() }}>↺ Réinitialiser NYC</button>
+        <button class="btn-danger" onclick={() => { if (confirm('Effacer toutes les données et recharger NYC par défaut ?')) resetToBootstrap() }}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
+          Réinitialiser NYC
+        </button>
       </div>
     {/if}
   </div>
 </div>
 
 <style>
-  .edit-view { height: 100%; display: flex; flex-direction: column; padding-bottom: var(--tab-bar-height); }
-  .sub-tabs { display: flex; border-bottom: 1px solid var(--color-border); flex-shrink: 0; }
-  .sub-tabs button { flex: 1; padding: 12px; background: none; border: none; font-size: 13px; font-weight: 500; color: var(--color-text-secondary); cursor: pointer; border-bottom: 2px solid transparent; }
-  .sub-tabs button.active { color: var(--color-text); border-bottom-color: var(--color-text); }
-  .tab-content { flex: 1; overflow-y: auto; padding: 12px 16px; }
-  .btn-add { width: 100%; padding: 10px; margin-bottom: 10px; border: 1.5px dashed var(--color-border); border-radius: 10px; background: none; color: var(--color-text-secondary); font-size: 13px; cursor: pointer; }
-  .list-item { display: flex; align-items: center; gap: 8px; padding: 10px 0; border-bottom: 1px solid var(--color-border); }
-  .zone-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-  .item-name { flex: 1; font-size: 14px; font-weight: 500; }
-  .item-meta { font-size: 11px; color: var(--color-text-tertiary); }
-  .btn-icon { background: none; border: none; cursor: pointer; font-size: 16px; padding: 4px; }
-  .form-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.5); display: flex; align-items: flex-end; z-index: 1500; }
-  .form-card { background: #fff; border-radius: 20px 20px 0 0; padding: 20px 20px 32px; width: 100%; padding-bottom: calc(32px + var(--safe-bottom)); }
+  .edit-view {
+    height: 100%; display: flex; flex-direction: column;
+    padding-bottom: calc(var(--tab-bar-height) + var(--safe-bottom));
+    background: var(--paper);
+  }
+  .sub-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--line);
+    flex-shrink: 0;
+  }
+  .sub-tabs button {
+    flex: 1;
+    padding: 14px 8px 12px;
+    background: none; border: none;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: color 0.15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .sub-tabs button.active {
+    color: var(--ink);
+    border-bottom-color: var(--accent);
+  }
+  .tab-content { flex: 1; overflow-y: auto; padding: 16px 18px; }
+
+  .btn-add {
+    width: 100%;
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    padding: 12px;
+    margin-bottom: 14px;
+    border: 1px dashed var(--line-strong);
+    border-radius: 10px;
+    background: transparent;
+    color: var(--ink-soft);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .btn-add:hover { color: var(--ink); border-color: var(--ink-soft); background: rgba(22,20,19,0.02); }
+
+  .list-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .zone-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    box-shadow: 0 0 0 1px rgba(0,0,0,0.06);
+  }
+  .item-name {
+    flex: 1;
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 600;
+    font-size: 15px;
+    line-height: 1.2;
+    color: var(--ink);
+  }
+  .item-meta {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--ink-faint);
+    letter-spacing: 0.04em;
+  }
+
+  .btn-icon {
+    background: transparent;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    cursor: pointer;
+    padding: 6px;
+    color: var(--ink-soft);
+    display: inline-flex; align-items: center; justify-content: center;
+    transition: all 0.12s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .btn-icon:hover { color: var(--ink); border-color: var(--line-strong); background: var(--paper-elevated); }
+  .btn-icon:active { transform: scale(0.92); }
+  .btn-icon-danger:hover { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); }
+
+  .form-overlay {
+    position: fixed; inset: 0;
+    background: rgba(15, 12, 10, 0.42);
+    backdrop-filter: blur(2px);
+    display: flex; align-items: flex-end;
+    z-index: 1500;
+    animation: fadeIn 0.18s ease;
+  }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  .form-card {
+    background: var(--paper);
+    border-top: 1px solid var(--line-strong);
+    border-radius: 22px 22px 0 0;
+    padding: 22px 22px 30px;
+    width: 100%;
+    padding-bottom: calc(30px + var(--safe-bottom));
+    animation: slideUpForm 0.28s cubic-bezier(0.32, 0.72, 0.3, 1);
+  }
+  @keyframes slideUpForm { from { transform: translateY(100%); } to { transform: translateY(0); } }
   .form-card-scroll { max-height: 85vh; overflow-y: auto; }
-  .form-card h3 { font-size: 16px; font-weight: 700; margin-bottom: 16px; }
-  .form-card label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; font-weight: 600; color: var(--color-text-secondary); margin-bottom: 12px; }
-  .form-card input, .form-card textarea { padding: 10px 12px; border: 1px solid var(--color-border); border-radius: 8px; font-size: 14px; outline: none; }
-  .form-card input:focus, .form-card textarea:focus { border-color: var(--color-accent); }
-  .checkbox-label { flex-direction: row !important; align-items: center; gap: 8px !important; }
+  .form-card h3 {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 600;
+    font-size: 22px;
+    line-height: 1.1;
+    letter-spacing: -0.015em;
+    color: var(--ink);
+    margin-bottom: 18px;
+  }
+  .form-card label {
+    display: flex; flex-direction: column; gap: 5px;
+    font-family: var(--font-mono);
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-bottom: 12px;
+  }
+  .form-card input, .form-card textarea {
+    padding: 11px 12px;
+    border: 1px solid var(--line-strong);
+    background: var(--paper-elevated);
+    border-radius: 8px;
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 400;
+    text-transform: none;
+    letter-spacing: 0;
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .form-card input:focus, .form-card textarea:focus { border-color: var(--ink); }
+  .checkbox-label { flex-direction: row !important; align-items: center; gap: 10px !important; }
+  .checkbox-label input { width: auto; }
   .form-row { display: flex; gap: 12px; }
   .form-row label { flex: 1; }
-  .form-actions { display: flex; gap: 10px; margin-top: 4px; }
-  .zone-filter { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
-  .zone-chip { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; background: var(--color-surface); color: var(--color-text-secondary); border: none; cursor: pointer; }
-  .zone-chip.active { background: var(--zone-color); color: white; }
-  .hint { font-size: 13px; color: var(--color-text-tertiary); padding: 12px 0; }
-  .data-section h3 { font-size: 15px; font-weight: 700; margin: 16px 0 6px; }
-  .data-section p { font-size: 13px; color: var(--color-text-secondary); margin-bottom: 10px; }
-  .btn-primary { padding: 12px 20px; background: #111; color: #fff; border: none; border-radius: 12px; font-size: 14px; font-weight: 600; cursor: pointer; display: inline-block; }
-  .btn-secondary { padding: 12px 20px; background: var(--color-surface); color: var(--color-text); border: none; border-radius: 12px; font-size: 14px; font-weight: 600; cursor: pointer; display: inline-block; }
-  .btn-danger { padding: 12px 20px; background: #fee2e2; color: #991b1b; border: none; border-radius: 12px; font-size: 14px; font-weight: 600; cursor: pointer; display: inline-block; }
+  .form-actions { display: flex; gap: 10px; margin-top: 6px; }
+
+  .zone-filter { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; }
+  .zone-chip {
+    padding: 5px 11px 6px;
+    border-radius: 999px;
+    font-family: var(--font-mono);
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    background: transparent;
+    color: var(--ink-soft);
+    border: 1px solid var(--line-strong);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .zone-chip.active { background: var(--zone-color); color: white; border-color: var(--zone-color); }
+
+  .hint {
+    font-family: var(--font-display);
+    font-style: italic;
+    color: var(--ink-faint);
+    font-size: 14px;
+    padding: 14px 0;
+  }
+
+  .data-section h3 {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 600;
+    font-size: 18px;
+    line-height: 1.1;
+    margin: 22px 0 6px;
+  }
+  .data-section h3:first-child { margin-top: 0; }
+  .data-section p { font-size: 13px; color: var(--ink-soft); margin-bottom: 12px; line-height: 1.5; }
+
+  .btn-primary {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 12px 18px;
+    background: var(--ink); color: var(--paper);
+    border: none; border-radius: 10px;
+    font-size: 13px; font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.1s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .btn-primary:active { transform: scale(0.98); }
+
+  .btn-secondary {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 12px 18px;
+    background: var(--paper-elevated); color: var(--ink);
+    border: 1px solid var(--line-strong);
+    border-radius: 10px;
+    font-size: 13px; font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.1s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .btn-secondary:active { transform: scale(0.98); }
+
+  .btn-danger {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 12px 18px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    border: 1px solid rgba(238,53,46,0.22);
+    border-radius: 10px;
+    font-size: 13px; font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.1s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .btn-danger:active { transform: scale(0.98); }
+
   .file-label { cursor: pointer; }
 </style>

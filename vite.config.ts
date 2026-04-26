@@ -2,9 +2,12 @@
 import { defineConfig } from 'vitest/config'
 import { svelte } from '@sveltejs/vite-plugin-svelte'
 import { VitePWA } from 'vite-plugin-pwa'
+import basicSsl from '@vitejs/plugin-basic-ssl'
 
 export default defineConfig({
+  server: { host: true, https: {} },
   plugins: [
+    basicSsl(),
     svelte(),
     VitePWA({
       registerType: 'autoUpdate',

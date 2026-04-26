@@ -164,7 +164,7 @@
 
   .chips {
     position: absolute; top: 12px; left: 12px; right: 12px;
-    z-index: 50; display: flex; flex-direction: column; gap: 6px; pointer-events: none;
+    z-index: 1100; display: flex; flex-direction: column; gap: 6px; pointer-events: none;
   }
   .chips > :global(*) { pointer-events: auto; }
 
@@ -172,7 +172,7 @@
     position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
     background: #fee2e2; color: #991b1b;
     padding: 6px 14px; border-radius: 14px; font-size: 12px; font-weight: 600;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.12); z-index: 60;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.12); z-index: 1100;
   }
 
   .recenter-btn {
@@ -183,7 +183,7 @@
     border-radius: 50%;
     background: #fff; border: none;
     box-shadow: 0 2px 12px rgba(0,0,0,0.18);
-    font-size: 20px; cursor: pointer; z-index: 60;
+    font-size: 20px; cursor: pointer; z-index: 1100;
     display: flex; align-items: center; justify-content: center;
     -webkit-tap-highlight-color: transparent;
     transition: transform 0.1s;

@@ -114,14 +114,14 @@
 <style>
   .backdrop {
     position: fixed; inset: 0; background: rgba(0,0,0,0.4);
-    z-index: 200; border: none; cursor: pointer;
+    z-index: 1500; border: none; cursor: pointer;
   }
   .sheet {
     position: fixed; bottom: 0; left: 0; right: 0;
     background: #fff; border-radius: 20px 20px 0 0;
     padding: 10px 20px 24px;
     padding-bottom: calc(24px + var(--safe-bottom));
-    z-index: 201; box-shadow: 0 -4px 32px rgba(0,0,0,0.15);
+    z-index: 1501; box-shadow: 0 -4px 32px rgba(0,0,0,0.15);
     animation: slideUp 0.25s ease;
   }
   @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }

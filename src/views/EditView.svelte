@@ -238,7 +238,7 @@
   .item-name { flex: 1; font-size: 14px; font-weight: 500; }
   .item-meta { font-size: 11px; color: var(--color-text-tertiary); }
   .btn-icon { background: none; border: none; cursor: pointer; font-size: 16px; padding: 4px; }
-  .form-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.5); display: flex; align-items: flex-end; z-index: 300; }
+  .form-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.5); display: flex; align-items: flex-end; z-index: 1500; }
   .form-card { background: #fff; border-radius: 20px 20px 0 0; padding: 20px 20px 32px; width: 100%; padding-bottom: calc(32px + var(--safe-bottom)); }
   .form-card-scroll { max-height: 85vh; overflow-y: auto; }
   .form-card h3 { font-size: 16px; font-weight: 700; margin-bottom: 16px; }

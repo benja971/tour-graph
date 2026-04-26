@@ -22,7 +22,7 @@
     position: fixed; bottom: 0; left: 0; right: 0;
     height: var(--tab-bar-height); padding-bottom: var(--safe-bottom);
     background: rgba(255,255,255,0.95); backdrop-filter: blur(12px);
-    border-top: 1px solid var(--color-border); display: flex; z-index: 100;
+    border-top: 1px solid var(--color-border); display: flex; z-index: 1000;
   }
   .tab {
     flex: 1; display: flex; flex-direction: column; align-items: center;

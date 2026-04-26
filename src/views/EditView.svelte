@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { activeTripStore, upsertZone, deleteZone, upsertStop, deleteStop, importTrip } from '../stores/app.svelte'
+  import { activeTripStore, upsertZone, deleteZone, upsertStop, deleteStop, importTrip, resetToBootstrap } from '../stores/app.svelte'
   import type { Zone, Stop } from '../lib/types'
 
   const trip = $derived(activeTripStore())
@@ -221,6 +221,9 @@
         <h3>Import</h3>
         <p>Remplace le trip actif avec un fichier JSON. Le fichier doit avoir "id" et "zones".</p>
         <label class="btn-secondary file-label">⬆ Importer JSON<input type="file" accept=".json" onchange={handleImport} style="display:none" /></label>
+        <h3>Réinitialiser</h3>
+        <p>Recharge les données NYC livrées avec l'app. Efface tes modifications et tes stops visités.</p>
+        <button class="btn-danger" onclick={() => { if (confirm('Effacer toutes les données et recharger NYC par défaut ?')) resetToBootstrap() }}>↺ Réinitialiser NYC</button>
       </div>
     {/if}
   </div>
@@ -257,5 +260,6 @@
   .data-section p { font-size: 13px; color: var(--color-text-secondary); margin-bottom: 10px; }
   .btn-primary { padding: 12px 20px; background: #111; color: #fff; border: none; border-radius: 12px; font-size: 14px; font-weight: 600; cursor: pointer; display: inline-block; }
   .btn-secondary { padding: 12px 20px; background: var(--color-surface); color: var(--color-text); border: none; border-radius: 12px; font-size: 14px; font-weight: 600; cursor: pointer; display: inline-block; }
+  .btn-danger { padding: 12px 20px; background: #fee2e2; color: #991b1b; border: none; border-radius: 12px; font-size: 14px; font-weight: 600; cursor: pointer; display: inline-block; }
   .file-label { cursor: pointer; }
 </style>

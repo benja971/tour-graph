@@ -76,3 +76,10 @@ export function setActiveTrip(tripId: string): void {
   state.activeTrip = tripId
   saveState(state)
 }
+
+export function resetToBootstrap(): void {
+  const trip = nycData as unknown as Trip
+  state.trips = [trip]
+  state.activeTrip = trip.id
+  saveState(state)
+}

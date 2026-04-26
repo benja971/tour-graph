@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { state, activeTripStore, upsertZone, deleteZone, upsertStop, deleteStop, importTrip } from '../stores/app.svelte'
+  import { activeTripStore, upsertZone, deleteZone, upsertStop, deleteStop, importTrip } from '../stores/app.svelte'
   import type { Zone, Stop } from '../lib/types'
 
   const trip = $derived(activeTripStore())

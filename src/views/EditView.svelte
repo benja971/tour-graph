@@ -111,6 +111,8 @@
   }
 
   let testMsg = $state<string | null>(null)
+  let testCountdown = $state(0)
+
   async function testNotif() {
     testMsg = null
     let fakeTop: Suggestion | null = null
@@ -124,6 +126,15 @@
         }
       }
     }
+
+    // Countdown so user can switch to another app — notifs are suppressed when tab has focus on Android Chrome
+    for (let i = 5; i > 0; i--) {
+      testCountdown = i
+      testMsg = `Notif dans ${i}s — change d'app maintenant`
+      await new Promise(r => setTimeout(r, 1000))
+    }
+    testCountdown = 0
+
     const r = await fireTestNotification(fakeTop)
     testMsg = r.ok ? `✓ Notification envoyée (via ${r.via})` : (r.error ?? 'Erreur')
     setTimeout(() => (testMsg = null), 6000)
@@ -270,10 +281,10 @@
         </button>
 
         <h3>Debug</h3>
-        <p>Envoie une fausse notification immédiate, sans attendre un changement de position.</p>
-        <button class="btn-secondary" onclick={testNotif}>
+        <p>Sur Android Chrome, les notifs sont masquées quand l'onglet a le focus. Le test attend 5s pour te laisser passer sur une autre app.</p>
+        <button class="btn-secondary" onclick={testNotif} disabled={testCountdown > 0}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21a2 2 0 0 0 4 0"/></svg>
-          Tester une notification
+          {testCountdown > 0 ? `Notif dans ${testCountdown}s…` : 'Tester une notification'}
         </button>
         {#if testMsg}<p class="test-msg">{testMsg}</p>{/if}
       </div>

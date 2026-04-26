@@ -125,8 +125,8 @@
       }
     }
     const r = await fireTestNotification(fakeTop)
-    testMsg = r.ok ? '✓ Notification envoyée' : (r.error ?? 'Erreur')
-    setTimeout(() => (testMsg = null), 4000)
+    testMsg = r.ok ? `✓ Notification envoyée (via ${r.via})` : (r.error ?? 'Erreur')
+    setTimeout(() => (testMsg = null), 6000)
   }
 
   function handleImport(e: Event) {

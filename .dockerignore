@@ -1,0 +1,15 @@
+node_modules
+dist
+dist-ssr
+.git
+.github
+.vscode
+.claude
+.superpowers
+tests
+docs
+scripts
+*.log
+.DS_Store
+*.local
+nyc_zone_graph.html

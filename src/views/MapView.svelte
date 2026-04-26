@@ -141,14 +141,19 @@
     if (tourBusy) return
     tourBusy = true
     tourMsg = null
-    if (tourState.active) {
-      await stopTour()
-    } else {
-      const r = await startTour()
-      if (!r.ok) tourMsg = r.error ?? 'Erreur'
+    try {
+      if (tourState.active) {
+        await stopTour()
+      } else {
+        const r = await startTour()
+        if (!r.ok) tourMsg = r.error ?? 'Erreur'
+      }
+    } catch (e) {
+      tourMsg = String(e)
+    } finally {
+      tourBusy = false
+      setTimeout(() => (tourMsg = null), 4000)
     }
-    tourBusy = false
-    setTimeout(() => (tourMsg = null), 4000)
   }
 
   onDestroy(() => { if (watchId != null) navigator.geolocation.clearWatch(watchId) })

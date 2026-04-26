@@ -36,18 +36,23 @@ async function showNotification(
     ...options
   }
 
-  // Prefer service worker (works in Android Chrome tab + survives backgrounding)
+  // Try service worker first — but with a hard timeout so we never hang.
   if ('serviceWorker' in navigator) {
     try {
-      const reg = await navigator.serviceWorker.ready
+      const reg = await Promise.race([
+        navigator.serviceWorker.ready,
+        new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error('SW ready timeout')), 1500)
+        )
+      ])
       await reg.showNotification(title, opts)
       return { ok: true, via: 'sw' }
     } catch (e) {
-      // fall through to page notification
+      console.warn('[tour] SW notification failed, falling back:', e)
     }
   }
 
-  // Fallback: in-page Notification (works on desktop/iOS, not always on Android)
+  // Fallback: in-page Notification (desktop / iOS / dev without SW)
   try {
     const n = new Notification(title, opts)
     n.onclick = () => { window.focus(); n.close() }
@@ -106,20 +111,22 @@ export async function startTour(): Promise<{ ok: boolean; error?: string }> {
   lastNotifiedTopId = null
   lastNotificationAt = 0
 
-  await acquireWakeLock()
+  if ('vibrate' in navigator) navigator.vibrate([60, 40, 60, 40, 120])
 
-  await showNotification('Mode Tour activé', {
+  // Fire and forget — don't block toggle return on SW or wake lock
+  acquireWakeLock().catch(() => {})
+  showNotification('Mode Tour activé', {
     body: 'Tu seras notifié quand le top stop change. Bonne balade.',
     tag: 'tour-started'
-  })
-  if ('vibrate' in navigator) navigator.vibrate([60, 40, 60, 40, 120])
+  }).catch(() => {})
 
   return { ok: true }
 }
 
 export async function stopTour(): Promise<void> {
   tourState.active = false
-  await releaseWakeLock()
+  // Fire and forget so the UI never gets stuck if release hangs
+  releaseWakeLock().catch(() => {})
 }
 
 export async function fireTestNotification(top: Suggestion | null): Promise<{ ok: boolean; error?: string; via?: string }> {

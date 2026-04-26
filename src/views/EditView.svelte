@@ -1,6 +1,7 @@
 <script lang="ts">
   import { activeTripStore, upsertZone, deleteZone, upsertStop, deleteStop, importTrip, resetToBootstrap } from '../stores/app.svelte'
-  import type { Zone, Stop } from '../lib/types'
+  import { fireTestNotification } from '../stores/tourMode.svelte'
+  import type { Zone, Stop, Suggestion } from '../lib/types'
 
   const trip = $derived(activeTripStore())
 
@@ -107,6 +108,25 @@
     const a = document.createElement('a')
     a.href = url; a.download = `${trip.id}-export.json`; a.click()
     URL.revokeObjectURL(url)
+  }
+
+  let testMsg = $state<string | null>(null)
+  async function testNotif() {
+    testMsg = null
+    let fakeTop: Suggestion | null = null
+    if (trip) {
+      const stop = trip.zones.flatMap(z => z.stops).find(s => !trip.visited.includes(s.id))
+      const zone = stop ? trip.zones.find(z => z.stops.includes(stop)) : null
+      if (stop && zone) {
+        fakeTop = {
+          stop, zoneId: zone.id, zoneName: zone.name, zoneColor: zone.color,
+          distanceKm: 0.42, walkMinutes: 6, openNow: true
+        }
+      }
+    }
+    const r = await fireTestNotification(fakeTop)
+    testMsg = r.ok ? '✓ Notification envoyée' : (r.error ?? 'Erreur')
+    setTimeout(() => (testMsg = null), 4000)
   }
 
   function handleImport(e: Event) {
@@ -248,6 +268,14 @@
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
           Réinitialiser NYC
         </button>
+
+        <h3>Debug</h3>
+        <p>Envoie une fausse notification immédiate, sans attendre un changement de position.</p>
+        <button class="btn-secondary" onclick={testNotif}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21a2 2 0 0 0 4 0"/></svg>
+          Tester une notification
+        </button>
+        {#if testMsg}<p class="test-msg">{testMsg}</p>{/if}
       </div>
     {/if}
   </div>
@@ -484,4 +512,15 @@
   .btn-danger:active { transform: scale(0.98); }
 
   .file-label { cursor: pointer; }
+  .test-msg {
+    margin-top: 10px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-soft);
+    padding: 8px 12px;
+    background: var(--paper-elevated);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    display: inline-block;
+  }
 </style>

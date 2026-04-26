@@ -75,12 +75,62 @@ export async function startTour(): Promise<{ ok: boolean; error?: string }> {
 
   await acquireWakeLock()
 
+  // Fire a confirmation notification right away
+  try {
+    const n = new Notification('Mode Tour activé', {
+      body: 'Tu seras notifié quand le top stop change. Bonne balade.',
+      icon: '/icon-192.png',
+      badge: '/icon-192.png',
+      tag: 'tour-started',
+      silent: false
+    })
+    n.onclick = () => { window.focus(); n.close() }
+  } catch {}
+  if ('vibrate' in navigator) navigator.vibrate([60, 40, 60, 40, 120])
+
   return { ok: true }
 }
 
 export async function stopTour(): Promise<void> {
   tourState.active = false
   await releaseWakeLock()
+}
+
+export async function fireTestNotification(top: Suggestion | null): Promise<{ ok: boolean; error?: string }> {
+  if (!('Notification' in window)) return { ok: false, error: 'Notifications non disponibles' }
+
+  let perm = Notification.permission
+  if (perm === 'default') perm = await Notification.requestPermission()
+  if (perm !== 'granted') return { ok: false, error: 'Permission refusée' }
+
+  const title = '🧪 Test — stop proche'
+  let body: string
+  if (top) {
+    const distLabel =
+      top.distanceKm < 1
+        ? Math.round(top.distanceKm * 1000) + ' m'
+        : top.distanceKm.toFixed(1) + ' km'
+    body = `${top.stop.name} · ${distLabel} · ~${top.walkMinutes} min à pied`
+  } else {
+    body = 'Pas de suggestion disponible — autorise le GPS d\'abord.'
+  }
+
+  try {
+    const n = new Notification(title, {
+      body,
+      icon: '/icon-192.png',
+      badge: '/icon-192.png',
+      tag: 'tour-test-' + Date.now(),  // unique tag → not dedup'd
+      requireInteraction: false,
+      silent: false
+    })
+    n.onclick = () => { window.focus(); n.close() }
+  } catch (e) {
+    return { ok: false, error: String(e) }
+  }
+
+  if ('vibrate' in navigator) navigator.vibrate([120, 60, 120])
+  return { ok: true }
 }
 
 export function maybeNotify(top: Suggestion | null): void {

@@ -26,6 +26,32 @@ let wakeLockSentinel: WakeLockSentinel | null = null
 
 // ── Notification dispatch — service worker preferred (Android Chrome requires it
 //    when running in a tab; otherwise new Notification() vibrates but doesn't show) ──
+// Pre-warm service worker registration at module load — by the time the user
+// interacts, navigator.serviceWorker.ready has already resolved.
+let swRegistration: ServiceWorkerRegistration | null = null
+let swReadyPromise: Promise<ServiceWorkerRegistration> | null = null
+if (typeof navigator !== 'undefined' && 'serviceWorker' in navigator) {
+  swReadyPromise = navigator.serviceWorker.ready.then(reg => {
+    swRegistration = reg
+    return reg
+  })
+}
+
+async function getSwRegistration(timeoutMs = 5000): Promise<ServiceWorkerRegistration | null> {
+  if (swRegistration) return swRegistration
+  if (!swReadyPromise) return null
+  try {
+    return await Promise.race([
+      swReadyPromise,
+      new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('SW ready timeout')), timeoutMs)
+      )
+    ])
+  } catch {
+    return null
+  }
+}
+
 async function showNotification(
   title: string,
   options: NotificationOptions & { tag?: string }
@@ -36,29 +62,28 @@ async function showNotification(
     ...options
   }
 
-  // Try service worker first — but with a hard timeout so we never hang.
-  if ('serviceWorker' in navigator) {
+  // Try service worker first — pre-warmed, should resolve instantly in normal usage.
+  const reg = await getSwRegistration()
+  if (reg) {
     try {
-      const reg = await Promise.race([
-        navigator.serviceWorker.ready,
-        new Promise<never>((_, reject) =>
-          setTimeout(() => reject(new Error('SW ready timeout')), 1500)
-        )
-      ])
       await reg.showNotification(title, opts)
       return { ok: true, via: 'sw' }
     } catch (e) {
-      console.warn('[tour] SW notification failed, falling back:', e)
+      console.warn('[tour] SW.showNotification failed:', e)
     }
   }
 
-  // Fallback: in-page Notification (desktop / iOS / dev without SW)
+  // Fallback only useful on desktop / iOS — Android Chrome will throw "Illegal constructor".
   try {
     const n = new Notification(title, opts)
     n.onclick = () => { window.focus(); n.close() }
     return { ok: true, via: 'page' }
   } catch (e) {
-    return { ok: false, via: 'none', error: String(e) }
+    return {
+      ok: false,
+      via: 'none',
+      error: 'Service Worker pas prêt — recharge la page ou installe en PWA. (' + String(e) + ')'
+    }
   }
 }
 

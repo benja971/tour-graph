@@ -74,14 +74,71 @@
 {/if}
 
 <style>
-  .graph-view { height: 100%; display: flex; flex-direction: column; padding-bottom: var(--tab-bar-height); }
-  .zone-picker { display: flex; gap: 6px; padding: 10px 12px; overflow-x: auto; flex-shrink: 0; border-bottom: 1px solid var(--color-border); scrollbar-width: none; }
+  .graph-view {
+    height: 100%; display: flex; flex-direction: column;
+    padding-bottom: calc(var(--tab-bar-height) + var(--safe-bottom));
+    background: var(--paper);
+  }
+  .zone-picker {
+    display: flex; gap: 6px;
+    padding: 14px 14px 12px;
+    overflow-x: auto; flex-shrink: 0;
+    border-bottom: 1px solid var(--line);
+    scrollbar-width: none;
+    background: var(--paper);
+  }
   .zone-picker::-webkit-scrollbar { display: none; }
-  .zone-chip { padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; white-space: nowrap; background: var(--color-surface); color: var(--color-text-secondary); border: none; cursor: pointer; flex-shrink: 0; }
-  .zone-chip.active { background: var(--zone-color); color: white; }
-  .graph-body { flex: 1; overflow-y: auto; padding: 14px 16px; }
-  .empty { color: var(--color-text-tertiary); font-size: 14px; padding: 20px 0; }
-  .branch-stop { display: block; margin-bottom: 10px; background: none; border: none; text-align: left; cursor: pointer; -webkit-tap-highlight-color: transparent; padding: 0; }
-  .branch-stop-name { display: block; font-size: 13px; font-weight: 600; color: var(--color-text); }
-  .branch-stop-desc { display: block; font-size: 11px; color: var(--color-text-secondary); line-height: 1.4; margin-top: 2px; }
+  .zone-chip {
+    position: relative;
+    padding: 6px 12px 7px;
+    border-radius: 999px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    background: transparent;
+    color: var(--ink-soft);
+    border: 1px solid var(--line-strong);
+    cursor: pointer; flex-shrink: 0;
+    transition: all 0.15s;
+  }
+  .zone-chip.active {
+    background: var(--zone-color);
+    color: white;
+    border-color: var(--zone-color);
+  }
+  .graph-body { flex: 1; overflow-y: auto; padding: 18px 18px 32px; }
+  .empty {
+    font-family: var(--font-display);
+    font-style: italic;
+    color: var(--ink-faint);
+    font-size: 16px; padding: 32px 0;
+    text-align: center;
+  }
+  .branch-stop {
+    display: block;
+    margin-bottom: 12px;
+    background: none; border: none;
+    text-align: left; cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    padding: 0;
+  }
+  .branch-stop-name {
+    display: block;
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--ink);
+    line-height: 1.2;
+  }
+  .branch-stop-desc {
+    display: block;
+    font-size: 12px;
+    color: var(--ink-soft);
+    line-height: 1.5;
+    margin-top: 3px;
+  }
 </style>

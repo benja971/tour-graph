@@ -96,6 +96,7 @@
   .tag-night { background: #161413; color: #F7F4EF; }
   .tag-sport { background: #E0E8F5; color: #2A4790; }
   .tag-tip   { background: #F7E9D0; color: #8A6010; }
+  .tag-pop   { background: #FFE3F0; color: #A8225C; }
   .branch {
     margin-left: 28px;
     border-left: 2px dashed var(--line-strong);

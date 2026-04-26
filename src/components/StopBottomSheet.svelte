@@ -47,14 +47,15 @@
   const openNow = $derived(isOpenNow())
 
   const tagLabels: Record<string, string> = {
-    free: 'Gratuit', food: 'Food', night: 'Soirée', sport: 'Sport', tip: 'Tip'
+    free: 'Gratuit', food: 'Food', night: 'Soirée', sport: 'Sport', tip: 'Tip', pop: 'Pop culture'
   }
   const tagColors: Record<string, { bg: string; text: string }> = {
     free:  { bg: '#E5F0E8', text: '#2D6E48' },
     food:  { bg: '#F5E6F7', text: '#6E2C7A' },
     night: { bg: '#161413', text: '#F7F4EF' },
     sport: { bg: '#E0E8F5', text: '#2A4790' },
-    tip:   { bg: '#F7E9D0', text: '#8A6010' }
+    tip:   { bg: '#F7E9D0', text: '#8A6010' },
+    pop:   { bg: '#FFE3F0', text: '#A8225C' }
   }
 
   function handleVisited() {

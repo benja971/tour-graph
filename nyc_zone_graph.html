@@ -1,0 +1,652 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans)}
+.zones{display:grid;gap:12px;padding:1rem 0}
+.zone{border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden}
+.zone-head{padding:10px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none}
+.zone-head:hover{background:var(--color-background-secondary)}
+.zone-title{font-size:14px;font-weight:500;color:var(--color-text-primary)}
+.zone-sub{font-size:11px;color:var(--color-text-secondary);margin-top:2px}
+.zone-pills{display:flex;gap:5px;flex-wrap:wrap}
+.pill{font-size:10px;padding:2px 8px;border-radius:20px;font-weight:500;white-space:nowrap}
+.p-free{background:#e8f4ed;color:#2d7a4f}
+.p-sport{background:#e6eeff;color:#2d48aa}
+.p-food{background:#fce8ff;color:#7a2d8a}
+.p-night{background:#1a1714;color:#f7f4ef}
+.p-tip{background:#fdf0e0;color:#9a6a10}
+.zone-body{border-top:0.5px solid var(--color-border-tertiary);padding:12px 16px;display:none}
+.zone-body.open{display:block}
+.graph{display:flex;flex-direction:column;gap:0}
+.stop{display:flex;gap:0;align-items:stretch}
+.stop-left{display:flex;flex-direction:column;align-items:center;width:24px;flex-shrink:0}
+.stop-dot{width:10px;height:10px;border-radius:50%;border:2px solid;flex-shrink:0;margin-top:4px}
+.stop-line{width:2px;flex:1;margin:3px 0}
+.stop-content{padding:4px 0 14px 12px;flex:1}
+.stop-name{font-size:13px;font-weight:500;color:var(--color-text-primary)}
+.stop-desc{font-size:11px;color:var(--color-text-secondary);line-height:1.5;margin-top:2px}
+.stop-tags{display:flex;gap:4px;flex-wrap:wrap;margin-top:5px}
+.branch{margin-left:24px;border-left:2px dashed var(--color-border-secondary);padding-left:12px;margin-top:-8px;margin-bottom:8px}
+.branch-label{font-size:10px;color:var(--color-text-tertiary);margin-bottom:6px;padding-top:4px}
+.branch-stop{margin-bottom:8px}
+.branch-stop-name{font-size:12px;font-weight:500;color:var(--color-text-primary)}
+.branch-stop-desc{font-size:11px;color:var(--color-text-secondary);line-height:1.5}
+.connector{font-size:10px;color:var(--color-text-tertiary);padding:2px 0 6px 0;display:flex;align-items:center;gap:6px}
+.connector::before{content:'';display:block;height:1px;width:20px;background:var(--color-border-secondary)}
+</style>
+<div class="zones">
+
+<div style="font-size:11px;color:var(--color-text-tertiary);padding:0 0 4px 0">
+  Clique sur une zone pour ouvrir le graphe de stops. Suis le fil, bifurque quand tu veux.
+</div>
+
+<!-- ZONE 1: BROOKLYN SOUTH -->
+<div class="zone">
+  <div class="zone-head" onclick="toggle(this)">
+    <div>
+      <div class="zone-title">Brooklyn Sud</div>
+      <div class="zone-sub">Williamsburg → Bushwick → Prospect Park → Coney Island</div>
+    </div>
+    <div class="zone-pills">
+      <span class="pill p-free">Quasi gratuit</span>
+      <span class="pill p-food">Smorgasburg</span>
+    </div>
+  </div>
+  <div class="zone-body">
+    <div class="graph">
+
+      <div class="stop">
+        <div class="stop-left">
+          <div class="stop-dot" style="border-color:#1D9E75;background:#E1F5EE"></div>
+          <div class="stop-line" style="background:#1D9E75;opacity:0.3"></div>
+        </div>
+        <div class="stop-content">
+          <div class="stop-name">Smorgasburg</div>
+          <div class="stop-desc">Marché food en plein air, 100 vendeurs, vue Manhattan. Samedi + dimanche. Arrive vers 11h avant la cohue.</div>
+          <div class="stop-tags"><span class="pill p-free">Gratuit d'entrée</span><span class="pill p-food">~$15–20</span></div>
+        </div>
+      </div>
+
+      <div class="connector">5 min à pied · Bedford Ave</div>
+
+      <div class="stop">
+        <div class="stop-left">
+          <div class="stop-dot" style="border-color:#1D9E75;background:#E1F5EE"></div>
+          <div class="stop-line" style="background:#1D9E75;opacity:0.3"></div>
+        </div>
+        <div class="stop-content">
+          <div class="stop-name">Williamsburg — Bedford Ave</div>
+          <div class="stop-desc">Balade. Boutiques, cafés indé, murals. L7 vers North 7th si tu veux voir la skyline depuis le waterfront.</div>
+          <div class="stop-tags"><span class="pill p-free">Gratuit</span></div>
+        </div>
+      </div>
+
+      <div class="connector">15 min à pied ou G train 1 arrêt</div>
+
+      <div class="stop">
+        <div class="stop-left">
+          <div class="stop-dot" style="border-color:#1D9E75;background:#E1F5EE"></div>
+          <div class="stop-line" style="background:#1D9E75;opacity:0.3"></div>
+        </div>
+        <div class="stop-content">
+          <div class="stop-name">Bushwick Collective</div>
+          <div class="stop-desc">Des centaines de murals géants depuis 2011 — artistes du monde entier. Commence Troutman & St Nicholas Ave, suis ta curiosité.</div>
+          <div class="stop-tags"><span class="pill p-free">Gratuit 24h/24</span></div>
+        </div>
+      </div>
+
+      <div class="connector">20 min · L train → 2/3 à Atlantic Ave</div>
+
+      <div class="stop">
+        <div class="stop-left">
+          <div class="stop-dot" style="border-color:#1D9E75;background:#E1F5EE"></div>
+          <div class="stop-line" style="background:#1D9E75;opacity:0.3"></div>
+        </div>
+        <div class="stop-content">
+          <div class="stop-name">Prospect Park</div>
+          <div class="stop-desc">847 acres, conçu par Olmsted (même que Central Park) mais beaucoup plus local. Aucun musée, juste le parc.</div>
+          <div class="stop-tags"><span class="pill p-free">Gratuit</span></div>
+        </div>
+      </div>
+
+      <div class="connector">45 min · F/Q train direct</div>
+
+      <div class="stop">
+        <div class="stop-left">
+          <div class="stop-dot" style="border-color:#1D9E75;background:#E1F5EE"></div>
+          <div class="stop-line" style="background:transparent"></div>
+        </div>
+        <div class="stop-content">
+          <div class="stop-name">Coney Island + Nathan's Famous</div>
+          <div class="stop-desc">Boardwalk, Luna Park, Cyclone rollercoaster depuis 1927. Nathan's : hot-dog original $5. Ambiance totalement anachronique. Bonus : Brighton Beach juste à côté = "Little Odessa", quartier russe authentique.</div>
+          <div class="stop-tags"><span class="pill p-free">Plage/boardwalk gratuits</span><span class="pill p-food">Hot-dog $5</span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ZONE 2: LOWER MANHATTAN + DUMBO -->
+<div class="zone">
+  <div class="zone-head" onclick="toggle(this)">
+    <div>
+      <div class="zone-title">Lower Manhattan + DUMBO</div>
+      <div class="zone-sub">Brooklyn Bridge → Oculus → Chinatown → LES → speakeasy</div>
+    </div>
+    <div class="zone-pills">
+      <span class="pill p-free">Gratuit</span>
+      <span class="pill p-night">Speakeasy</span>
+    </div>
+  </div>
+  <div class="zone-body">
+    <div class="graph">
+
+      <div class="stop">
+        <div class="stop-left">
+          <div class="stop-dot" style="border-color:#7F77DD;background:#EEEDFE"></div>
+          <div class="stop-line" style="background:#7F77DD;opacity:0.3"></div>
+        </div>
+        <div class="stop-content">
+          <div class="stop-name">DUMBO — Washington Street</div>
+          <div class="stop-desc">La photo avec le Manhattan Bridge encadré dans la rue. Brooklyn Bridge Park : meilleure vue skyline depuis la rive.</div>
+          <div class="stop-tags"><span class="pill p-free">Gratuit</span></div>
+        </div>
+      </div>
+
+      <div class="connector">10 min à pied vers le pont</div>
+
+      <div class="stop">
+        <div class="stop-left">
+          <div class="stop-dot" style="border-color:#7F77DD;background:#EEEDFE"></div>
+          <div class="stop-line" style="background:#7F77DD;opacity:0.3"></div>
+        </div>
+        <div class="stop-content">
+          <div class="stop-name">Brooklyn Bridge → Manhattan à pied</div>
+          <div class="stop-desc">30–45 min de traversée. Entre côté Brooklyn (Tillary St). Vue sur le skyline et l'East River.</div>
+          <div class="stop-tags"><span class="pill p-free">Gratuit</span></div>
+        </div>
+      </div>
+
+      <div class="connector">5 min à pied · Park Row vers Broadway</div>
+
+      <div class="stop">
+        <div class="stop-left">
+          <div class="stop-dot" style="border-color:#7F77DD;background:#EEEDFE"></div>
+          <div class="stop-line" style="background:#7F77DD;opacity:0.3"></div>
+        </div>
+        <div class="stop-content">
+          <div class="stop-name">Oculus (Calatrava)</div>
+          <div class="stop-desc">Gare en marbre blanc en forme de squelette. Photo intérieure spectaculaire. Passe dedans, prends l'escalator vers le bas.</div>
+          <div class="stop-tags"><span class="pill p-free">Gratuit</span></div>
+        </div>
+      </div>
+
+      <div class="connector">10 min à pied nord</div>
+
+      <div class="stop">
+        <div class="stop-left">
+          <div class="stop-dot" style="border-color:#7F77DD;background:#EEEDFE"></div>
+          <div class="stop-line" style="background:#7F77DD;opacity:0.3"></div>
+        </div>
+        <div class="stop-content">
+          <div class="stop-name">Chinatown — Nom Wah Tea Parlor</div>
+          <div class="stop-desc">Canal St & Mott St. Dim sum au Nom Wah (le plus ancien NYC, 1920) — ~$15–20. Marché de rue sur Canal.</div>
+          <div class="stop-tags"><span class="pill p-food">~$15–20</span></div>
+        </div>
+      </div>
+
+      <div class="connector">5 min à pied</div>
+
+      <div class="stop">
+        <div class="stop-left">
+          <div class="stop-dot" style="border-color:#7F77DD;background:#EEEDFE"></div>
+          <div class="stop-line" style="background:#7F77DD;opacity:0.3"></div>
+        </div>
+        <div class="stop-content">
+          <div class="stop-name">Nolita + Little Italy</div>
+          <div class="stop-desc">Mulberry St pour Little Italy (touristique mais rapide). Nolita (Spring/Prince/Mott) : boutiques indé, beaucoup mieux. Passe vite sur l'une, traîne sur l'autre.</div>
+          <div class="stop-tags"><span class="pill p-free">Balade gratuite</span></div>
+        </div>
+      </div>
+
+      <div class="connector">10 min à pied est · Delancey St</div>
+
+      <div class="stop">
+        <div class="stop-left">
+          <div class="stop-dot" style="border-color:#7F77DD;background:#EEEDFE"></div>
+          <div class="stop-line" style="background:#7F77DD;opacity:0.3"></div>
+        </div>
+        <div class="stop-content">
+          <div class="stop-name">Lower East Side — Essex Market</div>
+          <div class="stop-desc">Nouveau marché couvert. Orchard St & Delancey : quartier historique immigration juive et maintenant bars branchés. Traîne dans les friperies de Ludlow St.</div>
+          <div class="stop-tags"><span class="pill p-free">Gratuit</span></div>
+        </div>
+      </div>
+
+      <div class="connector">Soir uniquement — réserver à 15h pile le jour même</div>
+
+      <div class="stop">
+        <div class="stop-left">
+          <div class="stop-dot" style="border-color:#7F77DD;background:#EEEDFE"></div>
+          <div class="stop-line" style="background:transparent"></div>
+        </div>
+        <div class="stop-content">
+          <div class="stop-name">PDT (Please Don't Tell) — speakeasy</div>
+          <div class="stop-desc">East Village. Entrée par une cabine téléphonique dans Crif Dogs (hot-dog shop, 113 St Marks Pl). Cocktails ~$18–22. Résa en ligne à 15h00 pile le jour même, part en secondes.</div>
+          <div class="stop-tags"><span class="pill p-night">Speakeasy</span><span class="pill p-tip">Réserver à 15h pile</span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ZONE 3: GREENWICH VILLAGE + SOHO -->
+<div class="zone">
+  <div class="zone-head" onclick="toggle(this)">
+    <div>
+      <div class="zone-title">Greenwich Village + Soho</div>
+      <div class="zone-sub">Washington Square → Bleecker → Soho → Dead Rabbit</div>
+    </div>
+    <div class="zone-pills">
+      <span class="pill p-free">Gratuit</span>
+      <span class="pill p-night">Jazz live</span>
+    </div>
+  </div>
+  <div class="zone-body">
+    <div class="graph">
+
+      <div class="stop">
+        <div class="stop-left">
+          <div class="stop-dot" style="border-color:#D85A30;background:#FAECE7"></div>
+          <div class="stop-line" style="background:#D85A30;opacity:0.3"></div>
+        </div>
+        <div class="stop-content">
+          <div class="stop-name">Washington Square Park</div>
+          <div class="stop-desc">L'arche. Fontaine centrale. Des musiciens, des joueurs d'échecs, NYU autour. Tu connais déjà depuis le 4/20 — mais le reste de la journée il est différent.</div>
+          <div class="stop-tags"><span class="pill p-free">Gratuit</span></div>
+        </div>
+      </div>
+
+      <div class="connector">5 min à pied · Bleecker St ouest</div>
+
+      <div class="stop">
+        <div class="stop-left">
+          <div class="stop-dot" style="border-color:#D85A30;background:#FAECE7"></div>
+          <div class="stop-line" style="background:#D85A30;opacity:0.3"></div>
+        </div>
+        <div class="stop-content">
+          <div class="stop-name">Bleecker St + MacDougal St</div>
+          <div class="stop-desc">Coeur historique du folk des années 60. Café Wha? (Dylan, Hendrix, Richard Pryor y ont débuté). Nombreux bars à vin et petits restos. Traîne sans but précis.</div>
+          <div class="stop-tags"><span class="pill p-free">Balade gratuite</span></div>
+        </div>
+      </div>
+
+      <div class="connector">Village Vanguard à 178 7th Ave South — soir uniquement</div>
+
+      <div class="branch">
+        <div class="branch-label">BIFURCATION SOIR — jazz live</div>
+        <div class="branch-stop">
+          <div class="branch-stop-name">Village Vanguard</div>
+          <div class="branch-stop-desc">Depuis 1935. 2 sets (21h + 23h). ~$30 cover + 2 consommations minimum. La salle de jazz la plus légendaire des USA.</div>
+        </div>
+        <div class="branch-stop">
+          <div class="branch-stop-name">Blue Note</div>
+          <div class="branch-stop-desc">131 W 3rd St. Plus commercial, mais musiciens top. ~$25–45.</div>
+        </div>
+      </div>
+
+      <div class="connector">10 min à pied est · Spring St</div>
+
+      <div class="stop">
+        <div class="stop-left">
+          <div class="stop-dot" style="border-color:#D85A30;background:#FAECE7"></div>
+          <div class="stop-line" style="background:#D85A30;opacity:0.3"></div>
+        </div>
+        <div class="stop-content">
+          <div class="stop-name">Soho — Spring / Prince / Broome</div>
+          <div class="stop-desc">Architecture en fonte du XIXe. Galeries d'art au rez-de-chaussée. McNally Jackson Books (Prince St) : librairie indé top. Déjeuner : Balthazar (brasserie franco, ~$20–30, oui c'est français mais c'est une institution).</div>
+          <div class="stop-tags"><span class="pill p-free">Balade gratuite</span></div>
+        </div>
+      </div>
+
+      <div class="connector">20 min à pied sud ou A/C/E direct</div>
+
+      <div class="stop">
+        <div class="stop-left">
+          <div class="stop-dot" style="border-color:#D85A30;background:#FAECE7"></div>
+          <div class="stop-line" style="background:transparent"></div>
+        </div>
+        <div class="stop-content">
+          <div class="stop-name">The Dead Rabbit</div>
+          <div class="stop-desc">30 Water St, FiDi. Meilleur bar du monde en 2016. Taverne irish-américaine XVIIIe, cocktails saisonniers. ~$18–22. Moins de queue en semaine.</div>
+          <div class="stop-tags"><span class="pill p-night">Bar culte</span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ZONE 4: MIDTOWN + MoMA -->
+<div class="zone">
+  <div class="zone-head" onclick="toggle(this)">
+    <div>
+      <div class="zone-title">Midtown</div>
+      <div class="zone-sub">Grand Central → Koreatown → MoMA gratuit → Empire State</div>
+    </div>
+    <div class="zone-pills">
+      <span class="pill p-free">MoMA gratuit vendredi 16h</span>
+      <span class="pill p-sport">MSG Knicks</span>
+    </div>
+  </div>
+  <div class="zone-body">
+    <div class="graph">
+
+      <div class="stop">
+        <div class="stop-left">
+          <div class="stop-dot" style="border-color:#185FA5;background:#E6F1FB"></div>
+          <div class="stop-line" style="background:#185FA5;opacity:0.3"></div>
+        </div>
+        <div class="stop-content">
+          <div class="stop-name">Grand Central Terminal</div>
+          <div class="stop-desc">Plafond tiffany vert aux constellations. Ouvert toute la journée. Whispering Gallery sous les voûtes — murmure à un bout, entendu à l'autre.</div>
+          <div class="stop-tags"><span class="pill p-free">Gratuit</span></div>
+        </div>
+      </div>
+
+      <div class="connector">10 min à pied ouest · 42nd St</div>
+
+      <div class="stop">
+        <div class="stop-left">
+          <div class="stop-dot" style="border-color:#185FA5;background:#E6F1FB"></div>
+          <div class="stop-line" style="background:#185FA5;opacity:0.3"></div>
+        </div>
+        <div class="stop-content">
+          <div class="stop-name">Bryant Park + NYPL façade</div>
+          <div class="stop-desc">Parc derrière la bibliothèque. Tables, chaises, pelouse. Les lions de marbre devant la New York Public Library. Gratuit.</div>
+          <div class="stop-tags"><span class="pill p-free">Gratuit</span></div>
+        </div>
+      </div>
+
+      <div class="connector">5 min à pied nord · 5th Ave</div>
+
+      <div class="stop">
+        <div class="stop-left">
+          <div class="stop-dot" style="border-color:#185FA5;background:#E6F1FB"></div>
+          <div class="stop-line" style="background:#185FA5;opacity:0.3"></div>
+        </div>
+        <div class="stop-content">
+          <div class="stop-name">MoMA — vendredi 16h–21h gratuit</div>
+          <div class="stop-desc">Starry Night, Demoiselles d'Avignon, Nymphéas. Expo Frida Kahlo + Diego Rivera en ce moment. Arrive à 16h pile — queue à l'entrée mais ça avance vite. Économise $30.</div>
+          <div class="stop-tags"><span class="pill p-free">Gratuit vendredi soir</span><span class="pill p-tip">16h pile</span></div>
+        </div>
+      </div>
+
+      <div class="branch">
+        <div class="branch-label">BIFURCATION — selon l'envie</div>
+        <div class="branch-stop">
+          <div class="branch-stop-name">Koreatown · 32nd St</div>
+          <div class="branch-stop-desc">Entre 5th et 6th Ave. BBQ coréen, restos ouverts jusqu'à 2h. ~$20–35.</div>
+        </div>
+        <div class="branch-stop">
+          <div class="branch-stop-name">Empire State Building au coucher de soleil</div>
+          <div class="branch-stop-desc">Réserver le créneau 30–45 min avant coucher de soleil (vers 19h50 en mai). 86e étage ~$44.</div>
+        </div>
+        <div class="branch-stop">
+          <div class="branch-stop-name">MSG — Knicks playoffs (si série continue)</div>
+          <div class="branch-stop-desc">Game 5 le 28 avril à 20h. Possibles G7 le 2 mai. SeatGeek/StubHub ~$80–200+.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ZONE 5: UPPER WEST + HARLEM -->
+<div class="zone">
+  <div class="zone-head" onclick="toggle(this)">
+    <div>
+      <div class="zone-title">Upper Manhattan</div>
+      <div class="zone-sub">Lincoln Center → Harlem → Apollo → Roosevelt Island Tram</div>
+    </div>
+    <div class="zone-pills">
+      <span class="pill p-free">Gratuit</span>
+    </div>
+  </div>
+  <div class="zone-body">
+    <div class="graph">
+
+      <div class="stop">
+        <div class="stop-left">
+          <div class="stop-dot" style="border-color:#854F0B;background:#FAEEDA"></div>
+          <div class="stop-line" style="background:#854F0B;opacity:0.3"></div>
+        </div>
+        <div class="stop-content">
+          <div class="stop-name">Lincoln Center — esplanade</div>
+          <div class="stop-desc">Complexe Alice Tully / Met Opera / Avery Fisher Hall. Fontaine centrale, concerts gratuits sur l'esplanade certains jeudis midi. À voir même de l'extérieur.</div>
+          <div class="stop-tags"><span class="pill p-free">Extérieur gratuit</span></div>
+        </div>
+      </div>
+
+      <div class="connector">Central Park traversée · 30 min à pied ou taxi</div>
+
+      <div class="stop">
+        <div class="stop-left">
+          <div class="stop-dot" style="border-color:#854F0B;background:#FAEEDA"></div>
+          <div class="stop-line" style="background:#854F0B;opacity:0.3"></div>
+        </div>
+        <div class="stop-content">
+          <div class="stop-name">Central Park — The Ramble + Belvedere Castle</div>
+          <div class="stop-desc">The Ramble : forêt dense dans le parc, trails calmes, complètement inattendu au milieu de Manhattan. Belvedere Castle (gratuit) : vue panoramique sur le Great Lawn.</div>
+          <div class="stop-tags"><span class="pill p-free">Gratuit</span></div>
+        </div>
+      </div>
+
+      <div class="connector">2/3 subway nord → 125th St · 10 min</div>
+
+      <div class="stop">
+        <div class="stop-left">
+          <div class="stop-dot" style="border-color:#854F0B;background:#FAEEDA"></div>
+          <div class="stop-line" style="background:#854F0B;opacity:0.3"></div>
+        </div>
+        <div class="stop-content">
+          <div class="stop-name">Harlem — 125th St + Apollo Theater</div>
+          <div class="stop-desc">Façade de l'Apollo (façade gratuite, Amateur Hour le mercredi soir ~$30 si tu veux revenir). Frederick Douglass Blvd pour manger : soul food, caraïbéen, sénégalais. Sylvia's restaurant (~$20) si tu veux le classique.</div>
+          <div class="stop-tags"><span class="pill p-free">Balade gratuite</span><span class="pill p-food">Soul food</span></div>
+        </div>
+      </div>
+
+      <div class="connector">Subway 4/5/6 sud → 59th St · Roosevelt Island Tram</div>
+
+      <div class="stop">
+        <div class="stop-left">
+          <div class="stop-dot" style="border-color:#854F0B;background:#FAEEDA"></div>
+          <div class="stop-line" style="background:transparent"></div>
+        </div>
+        <div class="stop-content">
+          <div class="stop-name">Roosevelt Island Tram</div>
+          <div class="stop-desc">59th St & 2nd Ave. Téléphérique suspendu entre Manhattan et Queens au-dessus de l'East River. $3 OMNY. 4 min de traversée, vue sur les deux rives. Île quasi déserte en bas — promenade au bord de l'eau.</div>
+          <div class="stop-tags"><span class="pill p-free">$3 OMNY</span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ZONE 6: QUEENS -->
+<div class="zone">
+  <div class="zone-head" onclick="toggle(this)">
+    <div>
+      <div class="zone-title">Queens</div>
+      <div class="zone-sub">Flushing → Jackson Heights → Astoria · tour du monde en métro</div>
+    </div>
+    <div class="zone-pills">
+      <span class="pill p-food">Tour du monde $15</span>
+      <span class="pill p-free">Gratuit</span>
+    </div>
+  </div>
+  <div class="zone-body">
+    <div class="graph">
+
+      <div class="stop">
+        <div class="stop-left">
+          <div class="stop-dot" style="border-color:#0F6E56;background:#E1F5EE"></div>
+          <div class="stop-line" style="background:#0F6E56;opacity:0.3"></div>
+        </div>
+        <div class="stop-content">
+          <div class="stop-name">Flushing — vrai Chinatown</div>
+          <div class="stop-desc">Subway 7 → Flushing-Main St. Le Chinatown que les locaux fréquentent (pas le touristique de Manhattan). Flushing Mall : xiaolongbao, ramen, bubble tea. Mange très bien pour $10–15.</div>
+          <div class="stop-tags"><span class="pill p-food">$10–15</span></div>
+        </div>
+      </div>
+
+      <div class="connector">Subway 7 ouest → Jackson Hts-Roosevelt Ave · 15 min</div>
+
+      <div class="stop">
+        <div class="stop-left">
+          <div class="stop-dot" style="border-color:#0F6E56;background:#E1F5EE"></div>
+          <div class="stop-line" style="background:#0F6E56;opacity:0.3"></div>
+        </div>
+        <div class="stop-content">
+          <div class="stop-name">Jackson Heights — quartier le plus divers du monde</div>
+          <div class="stop-desc">Roosevelt Ave & 74th St. Bengali, indien, colombien, mexicain en 3 blocs. La NASA a dit que c'est le quartier le plus multilingue du monde. Birria tacos à $4. Boulangeries colombiennes, épiceries indiennes.</div>
+          <div class="stop-tags"><span class="pill p-free">Balade gratuite</span><span class="pill p-food">Tacos $4</span></div>
+        </div>
+      </div>
+
+      <div class="connector">N/W subway → Astoria · 20 min</div>
+
+      <div class="stop">
+        <div class="stop-left">
+          <div class="stop-dot" style="border-color:#0F6E56;background:#E1F5EE"></div>
+          <div class="stop-line" style="background:transparent"></div>
+        </div>
+        <div class="stop-content">
+          <div class="stop-name">Astoria — quartier grec + dîner</div>
+          <div class="stop-desc">Taverna Kyclades (poisson frais) ou Ovelia : meilleure grec de la côte Est. ~$25–35. Quartier en plein essor, nombreux bars.</div>
+          <div class="stop-tags"><span class="pill p-food">~$25–35</span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ZONE 7: BRONX -->
+<div class="zone">
+  <div class="zone-head" onclick="toggle(this)">
+    <div>
+      <div class="zone-title">The Bronx</div>
+      <div class="zone-sub">Arthur Ave → Grand Concourse → Yankee Stadium</div>
+    </div>
+    <div class="zone-pills">
+      <span class="pill p-free">Gratuit</span>
+      <span class="pill p-food">Vraie Little Italy</span>
+    </div>
+  </div>
+  <div class="zone-body">
+    <div class="graph">
+
+      <div class="stop">
+        <div class="stop-left">
+          <div class="stop-dot" style="border-color:#993C1D;background:#FAECE7"></div>
+          <div class="stop-line" style="background:#993C1D;opacity:0.3"></div>
+        </div>
+        <div class="stop-content">
+          <div class="stop-name">Arthur Avenue — vraie Little Italy</div>
+          <div class="stop-desc">Les Italo-américains du Bronx font leurs courses ici depuis 1900. Épiceries, fromagers, boucheries, boulangeries. Déjeuner au restaurant du marché couvert (~$15–20). Zéro touriste.</div>
+          <div class="stop-tags"><span class="pill p-food">~$15–20</span></div>
+        </div>
+      </div>
+
+      <div class="connector">20 min à pied sud · Grand Concourse</div>
+
+      <div class="stop">
+        <div class="stop-left">
+          <div class="stop-dot" style="border-color:#993C1D;background:#FAECE7"></div>
+          <div class="stop-line" style="background:#993C1D;opacity:0.3"></div>
+        </div>
+        <div class="stop-content">
+          <div class="stop-name">Grand Concourse — Art Déco du Bronx</div>
+          <div class="stop-desc">Le "Champs-Élysées du Bronx". Immeubles années 30 classés, lobbies en mosaïque. Totalement hors des sentiers battus. Flâne et lève les yeux.</div>
+          <div class="stop-tags"><span class="pill p-free">Gratuit</span></div>
+        </div>
+      </div>
+
+      <div class="connector">4 subway → 161st St-Yankee Stadium · 10 min</div>
+
+      <div class="stop">
+        <div class="stop-left">
+          <div class="stop-dot" style="border-color:#993C1D;background:#FAECE7"></div>
+          <div class="stop-line" style="background:transparent"></div>
+        </div>
+        <div class="stop-content">
+          <div class="stop-name">Yankee Stadium</div>
+          <div class="stop-desc">Extérieur toujours impressionnant. Si les Yankees jouent à domicile (vérifier mlb.com) : billets nosebleed dès ~$20. Visite guidée ~$30 hors match.</div>
+          <div class="stop-tags"><span class="pill p-sport">MLB si match</span><span class="pill p-tip">Vérifier calendrier</span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ZONE 8: JERSEY CITY (base) -->
+<div class="zone">
+  <div class="zone-head" onclick="toggle(this)">
+    <div>
+      <div class="zone-title">Jersey City — ta base</div>
+      <div class="zone-sub">Liberty State Park · meilleure vue skyline + Statue</div>
+    </div>
+    <div class="zone-pills">
+      <span class="pill p-free">Gratuit</span>
+    </div>
+  </div>
+  <div class="zone-body">
+    <div class="graph">
+
+      <div class="stop">
+        <div class="stop-left">
+          <div class="stop-dot" style="border-color:#3B6D11;background:#EAF3DE"></div>
+          <div class="stop-line" style="background:#3B6D11;opacity:0.3"></div>
+        </div>
+        <div class="stop-content">
+          <div class="stop-name">Liberty State Park</div>
+          <div class="stop-desc">Meilleure vue gratuite sur le skyline de Manhattan + Statue de la Liberté depuis la rive NJ. Empty Sky 9/11 Memorial sur place. À faire un soir au coucher de soleil — tu n'as pas besoin de traverser.</div>
+          <div class="stop-tags"><span class="pill p-free">Gratuit</span></div>
+        </div>
+      </div>
+
+      <div class="connector">PATH train → Manhattan WTC · 8 min</div>
+
+      <div class="stop">
+        <div class="stop-left">
+          <div class="stop-dot" style="border-color:#3B6D11;background:#EAF3DE"></div>
+          <div class="stop-line" style="background:transparent"></div>
+        </div>
+        <div class="stop-content">
+          <div class="stop-name">Grove St + Journal Square — cafés locaux</div>
+          <div class="stop-desc">JC est en plein essor. Brunch ou café à deux pas de chez toi, sans traverser. Beaucoup moins cher que Manhattan, ambiance moins touristique.</div>
+          <div class="stop-tags"><span class="pill p-food">$8–15</span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div style="font-size:11px;color:var(--color-text-tertiary);padding:4px 0 0 0">
+  MoMA PS1 (Queens, Long Island City) — gratuit toute l'année 2026 · Accessible depuis le graphe Queens ou Midtown · N/W ou E train vers Court Sq
+</div>
+
+</div>
+
+<script>
+function toggle(head){
+  const body=head.nextElementSibling;
+  body.classList.toggle('open');
+}
+</script>

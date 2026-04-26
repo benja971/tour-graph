@@ -4,6 +4,7 @@
   import 'leaflet/dist/leaflet.css'
   import { activeTripStore } from '../stores/app.svelte'
   import { computeSuggestions } from '../lib/suggestions'
+  import { tourState, startTour, stopTour, maybeNotify } from '../stores/tourMode.svelte'
   import type { Stop } from '../lib/types'
   import SuggestionChip from '../components/SuggestionChip.svelte'
   import StopBottomSheet from '../components/StopBottomSheet.svelte'
@@ -128,6 +129,28 @@
     }
   }
 
+  // Tour mode: notify when top suggestion changes
+  $effect(() => {
+    if (suggestions.length > 0) maybeNotify(suggestions[0])
+  })
+
+  let tourBusy = $state(false)
+  let tourMsg = $state<string | null>(null)
+
+  async function toggleTour() {
+    if (tourBusy) return
+    tourBusy = true
+    tourMsg = null
+    if (tourState.active) {
+      await stopTour()
+    } else {
+      const r = await startTour()
+      if (!r.ok) tourMsg = r.error ?? 'Erreur'
+    }
+    tourBusy = false
+    setTimeout(() => (tourMsg = null), 4000)
+  }
+
   onDestroy(() => { if (watchId != null) navigator.geolocation.clearWatch(watchId) })
 </script>
 
@@ -136,12 +159,31 @@
 
   <!-- Header bar -->
   <header class="hdr">
-    <div class="hdr-mark">●</div>
+    <div class="hdr-mark" class:live={tourState.active}>●</div>
     <div class="hdr-text">
       <div class="hdr-eyebrow">{trip?.name ?? '—'}</div>
-      <div class="hdr-title">À proximité</div>
+      <div class="hdr-title">{tourState.active ? 'Mode Tour actif' : 'À proximité'}</div>
     </div>
+    <button
+      class="tour-btn"
+      class:active={tourState.active}
+      onclick={toggleTour}
+      disabled={tourBusy}
+      aria-label={tourState.active ? 'Arrêter le tour' : 'Démarrer le tour'}
+    >
+      {#if tourState.active}
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
+        Stop
+      {:else}
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+        Tour
+      {/if}
+    </button>
   </header>
+
+  {#if tourMsg}
+    <div class="tour-msg">{tourMsg}</div>
+  {/if}
 
   {#if suggestions.length > 0}
     <div class="chips">
@@ -200,6 +242,56 @@
     color: var(--accent);
     font-size: 8px;
     line-height: 1;
+  }
+  .hdr-mark.live {
+    animation: hdr-pulse 1.4s ease-in-out infinite;
+  }
+  @keyframes hdr-pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%      { opacity: 0.4; transform: scale(1.4); }
+  }
+
+  .tour-btn {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 6px 11px;
+    margin-left: 4px;
+    background: var(--ink);
+    color: var(--paper);
+    border: none;
+    border-radius: 999px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .tour-btn:active { transform: scale(0.94); }
+  .tour-btn.active {
+    background: var(--accent);
+    color: white;
+  }
+  .tour-btn:disabled { opacity: 0.5; cursor: wait; }
+
+  .tour-msg {
+    position: absolute;
+    top: 64px; left: 50%;
+    transform: translateX(-50%);
+    background: var(--accent-soft);
+    color: var(--accent);
+    padding: 8px 16px;
+    border-radius: 10px;
+    border: 1px solid rgba(238,53,46,0.22);
+    font-size: 12px;
+    font-weight: 600;
+    z-index: 1200;
+    animation: tour-msg-in 0.2s ease;
+  }
+  @keyframes tour-msg-in {
+    from { opacity: 0; transform: translate(-50%, -8px); }
+    to   { opacity: 1; transform: translate(-50%, 0); }
   }
   .hdr-eyebrow {
     font-family: var(--font-mono);

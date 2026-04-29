@@ -1,7 +1,9 @@
 <script lang="ts">
+  import type { Snippet } from 'svelte'
   import type { Stop } from '../lib/types'
-  let { stop, zoneColor, isVisited, isLast, onTap }: {
-    stop: Stop; zoneColor: string; isVisited: boolean; isLast: boolean; onTap: () => void
+  let { stop, zoneColor, isVisited, isLast, onTap, branchStop }: {
+    stop: Stop; zoneColor: string; isVisited: boolean; isLast: boolean; onTap: () => void;
+    branchStop?: Snippet<[string]>
   } = $props()
 </script>
 
@@ -37,7 +39,6 @@
   <div class="connector"><span class="connector-line"></span>{stop.connectorToNext}</div>
 {/if}
 
-{#snippet branchStop(_id: string)}{/snippet}
 
 <style>
   .stop-row { display: flex; gap: 0; align-items: stretch; }

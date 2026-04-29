@@ -68,23 +68,7 @@ jobs:
           envs: GH_TOKEN,GH_ACTOR,VPS_PROJECT_PATH
           script: |
             echo "$GH_TOKEN" | docker login ghcr.io -u "$GH_ACTOR" --password-stdin
-            mkdir -p "${VPS_PROJECT_PATH:-$HOME/apps/tour-graph}"
             cd "${VPS_PROJECT_PATH:-$HOME/apps/tour-graph}"
-            cat > docker-compose.yml << 'COMPOSE'
-            services:
-              frontend:
-                container_name: tour-graph
-                image: ghcr.io/benja971/tour-graph:latest
-                restart: unless-stopped
-                ports:
-                  - '127.0.0.1:3010:3000'
-                networks:
-                  - infra-net
-
-            networks:
-              infra-net:
-                external: true
-            COMPOSE
             docker compose pull
             docker compose up -d --remove-orphans
             docker image prune -f
@@ -102,6 +86,9 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           port: ${{ secrets.VPS_PORT || 22 }}
           script: |
-            sleep 5
-            docker exec tour-graph wget -qO- http://localhost:3000 > /dev/null || exit 1
-            echo "tour-graph deployment successful!"
+            for i in $(seq 1 12); do
+              docker exec tour-graph wget -qO- http://localhost:3000 > /dev/null && echo "tour-graph deployment successful!" && exit 0
+              echo "Waiting for container... ($i/12)"
+              sleep 5
+            done
+            echo "Health check failed after 60s" && exit 1

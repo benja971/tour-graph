@@ -236,12 +236,19 @@
 
   <div class="tab-content">
     {#if activeSubTab === 'trips'}
-      <button class="btn-add" onclick={() => openTripForm()}>
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
-        Nouveau trip
-      </button>
+      <div class="trips-actions">
+        <button class="btn-add" onclick={() => openTripForm()}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+          Nouveau trip
+        </button>
+        <label class="btn-add file-label">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21V7M5 12l7-7 7 7M5 3h14"/></svg>
+          Importer JSON
+          <input type="file" accept=".json" onchange={handleImport} style="display:none" />
+        </label>
+      </div>
       {#if appState.trips.length === 0}
-        <p class="hint">Aucun trip. Crée-en un ou importe un fichier JSON depuis la sub-section Données après création.</p>
+        <p class="hint">Aucun trip pour le moment. Crée-en un ou importe un fichier JSON.</p>
       {/if}
       {#each appState.trips as t, idx (t.id)}
         {@const isActive = appState.activeTrip === t.id}
@@ -441,6 +448,15 @@
     opacity: 0.4;
     cursor: not-allowed;
   }
+
+  .trips-actions {
+    display: flex; gap: 10px; margin-bottom: 14px;
+  }
+  .trips-actions .btn-add {
+    margin-bottom: 0;
+    flex: 1;
+  }
+  .file-label { cursor: pointer; }
 
   .trip-row {
     display: flex; align-items: center; gap: 8px;

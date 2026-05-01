@@ -9,6 +9,8 @@
   import { toastSuccess, toastError } from '../stores/toast.svelte'
   import { importTripFromFile, ImportTripError } from '../lib/importTripFromFile'
   import { getTripColor, DEFAULT_TRIP_COLOR } from '../lib/tripColor'
+  import type { PhotonResult } from '../lib/photon'
+  import SearchBox from '../components/SearchBox.svelte'
   import type { Zone, Stop, Suggestion, Trip } from '../lib/types'
 
   const trip = $derived(activeTripStore())
@@ -120,6 +122,21 @@
     hoursEnabled: false, open: '09:00', close: '21:00',
     days: '0,1,2,3,4,5,6', connectorToNext: ''
   })
+
+  const tripCenter = $derived.by<{ lat: number; lng: number } | null>(() => {
+    if (!trip) return null
+    const stops = trip.zones.flatMap(z => z.stops)
+    if (stops.length === 0) return null
+    const lat = stops.reduce((sum, s) => sum + s.lat, 0) / stops.length
+    const lng = stops.reduce((sum, s) => sum + s.lng, 0) / stops.length
+    return { lat, lng }
+  })
+
+  function handlePlaceSelected(r: PhotonResult) {
+    stopForm.lat = String(r.lat)
+    stopForm.lng = String(r.lng)
+    if (!stopForm.name.trim()) stopForm.name = r.shortName
+  }
 
   function openStopForm(zoneId: string, stop?: Stop) {
     selectedEditZoneId = zoneId
@@ -358,12 +375,17 @@
         <div class="form-overlay" onclick={() => (showStopForm = false)} role="presentation">
           <div class="form-card form-card-scroll" onclick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-label={editingStop ? 'Modifier stop' : 'Nouveau stop'} tabindex="-1">
             <h3>{editingStop ? 'Modifier stop' : 'Nouveau stop'}</h3>
+            <div class="search-field">
+              <span class="field-label">Lieu *</span>
+              <SearchBox biasLat={tripCenter?.lat} biasLng={tripCenter?.lng} onSelect={handlePlaceSelected} />
+              {#if stopForm.lat && stopForm.lng && !isNaN(parseFloat(stopForm.lat)) && !isNaN(parseFloat(stopForm.lng))}
+                <span class="coords-feedback">📍 {parseFloat(stopForm.lat).toFixed(4)}, {parseFloat(stopForm.lng).toFixed(4)}</span>
+              {:else}
+                <span class="coords-hint">Cherche un lieu pour positionner ce stop.</span>
+              {/if}
+            </div>
             <label>Nom *<input bind:value={stopForm.name} placeholder="Smorgasburg" /></label>
             <label>Description<textarea bind:value={stopForm.desc} rows="3"></textarea></label>
-            <div class="form-row">
-              <label>Latitude *<input bind:value={stopForm.lat} placeholder="40.7208" inputmode="decimal" /></label>
-              <label>Longitude *<input bind:value={stopForm.lng} placeholder="-73.9612" inputmode="decimal" /></label>
-            </div>
             <label>Tags (virgule séparés)<input bind:value={stopForm.tags} placeholder="free, food" /></label>
             <label>Durée estimée (min)<input bind:value={stopForm.estimatedMinutes} inputmode="numeric" /></label>
             <label>Connecteur vers suivant<input bind:value={stopForm.connectorToNext} placeholder="5 min à pied" /></label>
@@ -610,6 +632,32 @@
   .checkbox-label input { width: auto; }
   .form-row { display: flex; gap: 12px; }
   .form-row label { flex: 1; }
+
+  .search-field {
+    display: flex; flex-direction: column; gap: 5px;
+    margin-bottom: 12px;
+  }
+  .field-label {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+  .coords-feedback {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink);
+    margin-top: 2px;
+  }
+  .coords-hint {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--ink-faint);
+    letter-spacing: 0.04em;
+    margin-top: 2px;
+  }
   .form-actions { display: flex; gap: 10px; margin-top: 6px; }
 
   .zone-filter { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; }

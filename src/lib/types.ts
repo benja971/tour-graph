@@ -8,6 +8,7 @@ export interface AppState {
 export interface Trip {
   id: string
   name: string
+  color: string           // accent color used in the trip switcher and trips list
   visited: string[]       // stop ids visited in THIS trip
   zones: Zone[]
 }

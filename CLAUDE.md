@@ -25,10 +25,10 @@ The dev server uses `@vitejs/plugin-basic-ssl` because the Geolocation API and S
 
 ### Stores (`src/stores/`)
 
-- `app.svelte.ts` exports `state` as a top-level `$state` rune. All mutations go through helper functions (`markVisited`, `upsertStop`, `resetToBootstrap`, …) that call `saveState(state)` after mutating.
+- `app.svelte.ts` exports `state` as a top-level `$state` rune. All mutations go through helper functions (`markVisited`, `upsertStop`, `createTrip`, `duplicateTrip`, `deleteTrip`, `resetActiveTrip`, …) that call `saveState(state)` after mutating.
 - `tourMode.svelte.ts` owns "tour mode": notification permissions, wake lock, throttled proximity notifications. **Notifications must go through the service worker** (`registration.showNotification`), not `new Notification()` — Android Chrome throws on the latter when running in a tab. The SW registration is pre-warmed at module load (see `swReadyPromise`) with a timeout fallback.
 
-State persists to `localStorage` under key `tourapp`. On first run, `src/data/nyc.json` is loaded as the bootstrap trip. **localStorage shadows the bootstrap JSON** — to see updates from `nyc.json` after the first run, the user must hit the Reset button (`resetToBootstrap`).
+State persists to `localStorage` under key `tourapp`. On first run with no saved state, `state.trips` is empty and the UI shows an empty state with "Créer un trip" / "Importer JSON" CTAs. `src/data/nyc.json` is still bundled but is no longer loaded automatically — it can be imported manually (or removed entirely from the bundle).
 
 ### Views (`src/views/`)
 

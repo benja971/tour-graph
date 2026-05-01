@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { activeTripStore, upsertZone, deleteZone, upsertStop, deleteStop, importTrip, resetToBootstrap } from '../stores/app.svelte'
+  import { activeTripStore, upsertZone, deleteZone, upsertStop, deleteStop, importTrip, resetActiveTrip } from '../stores/app.svelte'
   import { fireTestNotification } from '../stores/tourMode.svelte'
   import { toastSuccess, toastError } from '../stores/toast.svelte'
   import type { Zone, Stop, Suggestion } from '../lib/types'
@@ -288,11 +288,11 @@
           Importer JSON
           <input type="file" accept=".json" onchange={handleImport} style="display:none" />
         </label>
-        <h3>Réinitialiser</h3>
-        <p>Recharge les données NYC livrées avec l'app. Efface tes modifications et tes stops visités.</p>
-        <button class="btn-danger" onclick={() => { if (confirm('Effacer toutes les données et recharger NYC par défaut ?')) { resetToBootstrap(); toastSuccess('Données NYC rechargées') } }}>
+        <h3>Vider les visites</h3>
+        <p>Remet à zéro la liste des stops visités du trip actif. Les zones et stops restent intacts.</p>
+        <button class="btn-danger" disabled={!trip} onclick={() => { if (trip && confirm(`Vider les visites de "${trip.name}" ?`)) { resetActiveTrip(); toastSuccess('Visites effacées') } }}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
-          Réinitialiser NYC
+          Vider les visites
         </button>
 
         <h3>Debug</h3>

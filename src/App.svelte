@@ -1,6 +1,7 @@
 <script lang="ts">
   import TabBar from './components/TabBar.svelte'
   import Toaster from './components/Toaster.svelte'
+  import TripSwitcher from './components/TripSwitcher.svelte'
   import MapView from './views/MapView.svelte'
   import GraphView from './views/GraphView.svelte'
   import EditView from './views/EditView.svelte'
@@ -9,6 +10,7 @@
 </script>
 
 <div class="app-shell">
+  <TripSwitcher />
   <main class="view-container">
     {#if activeTab === 'map'}
       <MapView />

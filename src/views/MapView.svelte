@@ -9,6 +9,7 @@
   import type { Stop } from '../lib/types'
   import SuggestionChip from '../components/SuggestionChip.svelte'
   import StopBottomSheet from '../components/StopBottomSheet.svelte'
+  import EmptyTripsState from '../components/EmptyTripsState.svelte'
 
   let mapEl: HTMLDivElement | undefined = $state()
   let map = $state<L.Map | undefined>(undefined)
@@ -159,6 +160,9 @@
   onDestroy(() => { if (watchId != null) navigator.geolocation.clearWatch(watchId) })
 </script>
 
+{#if !trip}
+  <EmptyTripsState />
+{:else}
 <div class="map-container">
   <div bind:this={mapEl} class="map"></div>
 
@@ -222,6 +226,7 @@
     />
   {/if}
 </div>
+{/if}
 
 <style>
   .map-container { position: relative; width: 100%; height: 100%; }

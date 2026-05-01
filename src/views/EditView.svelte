@@ -1,13 +1,76 @@
 <script lang="ts">
-  import { activeTripStore, upsertZone, deleteZone, upsertStop, deleteStop, importTrip, resetActiveTrip } from '../stores/app.svelte'
-  import { fireTestNotification } from '../stores/tourMode.svelte'
+  import {
+    state as appState,
+    activeTripStore, upsertZone, deleteZone, upsertStop, deleteStop,
+    importTrip, resetActiveTrip,
+    createTrip, renameTrip, duplicateTrip, deleteTrip, setActiveTrip
+  } from '../stores/app.svelte'
+  import { fireTestNotification, tourState, stopTour } from '../stores/tourMode.svelte'
   import { toastSuccess, toastError } from '../stores/toast.svelte'
-  import type { Zone, Stop, Suggestion } from '../lib/types'
+  import { importTripFromFile, ImportTripError } from '../lib/importTripFromFile'
+  import { getTripColor, DEFAULT_TRIP_COLOR } from '../lib/tripColor'
+  import type { Zone, Stop, Suggestion, Trip } from '../lib/types'
 
   const trip = $derived(activeTripStore())
 
-  type SubTab = 'zones' | 'stops' | 'data'
-  let activeSubTab = $state<SubTab>('zones')
+  type SubTab = 'trips' | 'zones' | 'stops' | 'data'
+  let activeSubTab = $state<SubTab>(appState.trips.length === 0 ? 'trips' : 'zones')
+
+  $effect(() => {
+    if (appState.trips.length === 0 && activeSubTab !== 'trips') {
+      activeSubTab = 'trips'
+    }
+  })
+
+  function selectSubTab(tab: SubTab) {
+    if (tab !== 'trips' && appState.trips.length === 0) {
+      toastError('Crée un trip d\'abord')
+      return
+    }
+    activeSubTab = tab
+  }
+
+  // Trip form (create / rename)
+  let showTripForm = $state(false)
+  let editingTripId = $state<string | null>(null)
+  let tripFormName = $state('')
+  let tripFormColor = $state(DEFAULT_TRIP_COLOR)
+
+  function openTripForm(t?: Trip) {
+    editingTripId = t?.id ?? null
+    tripFormName = t?.name ?? ''
+    tripFormColor = t?.color ?? DEFAULT_TRIP_COLOR
+    showTripForm = true
+  }
+
+  function saveTripForm() {
+    const name = tripFormName.trim()
+    if (!name) return
+    if (editingTripId) {
+      renameTrip(editingTripId, name, tripFormColor)
+      toastSuccess(`Trip "${name}" mis à jour`)
+    } else {
+      const t = createTrip(name, tripFormColor)
+      toastSuccess(`Trip "${t.name}" créé`)
+    }
+    showTripForm = false
+  }
+
+  function handleDuplicate(tripId: string) {
+    const dup = duplicateTrip(tripId)
+    if (dup) toastSuccess(`Trip dupliqué · "${dup.name}"`)
+  }
+
+  async function handleDeleteTrip(t: Trip) {
+    const stopsTotal = t.zones.reduce((sum, z) => sum + z.stops.length, 0)
+    const detail = stopsTotal > 0 ? ` (${t.zones.length} zones, ${stopsTotal} stops)` : ''
+    if (!confirm(`Supprimer le trip "${t.name}"${detail} ?`)) return
+    if (t.id === appState.activeTrip && tourState.active) {
+      await stopTour()
+    }
+    deleteTrip(t.id)
+    toastSuccess(`Trip "${t.name}" supprimé`)
+  }
 
   // Zone form
   let showZoneForm = $state(false)
@@ -150,36 +213,73 @@
     setTimeout(() => (testMsg = null), 6000)
   }
 
-  function handleImport(e: Event) {
+  async function handleImport(e: Event) {
     const file = (e.target as HTMLInputElement).files?.[0]
     if (!file) return
-    const reader = new FileReader()
-    reader.onload = ev => {
-      try {
-        const data = JSON.parse(ev.target!.result as string)
-        if (!data.id || !data.zones) {
-          toastError('JSON invalide — il manque "id" ou "zones"')
-          return
-        }
-        importTrip(data)
-        toastSuccess(`Trip "${data.name}" importé`)
-      } catch {
-        toastError('Impossible de lire le fichier JSON')
-      }
+    try {
+      const trip = await importTripFromFile(file)
+      importTrip(trip)
+      toastSuccess(`Trip "${trip.name}" importé`)
+    } catch (err) {
+      toastError(err instanceof ImportTripError ? err.message : 'Erreur d\'import')
     }
-    reader.readAsText(file)
   }
 </script>
 
 <div class="edit-view">
   <div class="sub-tabs">
-    <button class:active={activeSubTab === 'zones'} onclick={() => (activeSubTab = 'zones')}>Zones</button>
-    <button class:active={activeSubTab === 'stops'} onclick={() => (activeSubTab = 'stops')}>Stops</button>
-    <button class:active={activeSubTab === 'data'} onclick={() => (activeSubTab = 'data')}>Données</button>
+    <button class:active={activeSubTab === 'trips'} onclick={() => selectSubTab('trips')}>Trips</button>
+    <button class:active={activeSubTab === 'zones'} disabled={appState.trips.length === 0} onclick={() => selectSubTab('zones')}>Zones</button>
+    <button class:active={activeSubTab === 'stops'} disabled={appState.trips.length === 0} onclick={() => selectSubTab('stops')}>Stops</button>
+    <button class:active={activeSubTab === 'data'} disabled={appState.trips.length === 0} onclick={() => selectSubTab('data')}>Données</button>
   </div>
 
   <div class="tab-content">
-    {#if activeSubTab === 'zones'}
+    {#if activeSubTab === 'trips'}
+      <button class="btn-add" onclick={() => openTripForm()}>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+        Nouveau trip
+      </button>
+      {#if appState.trips.length === 0}
+        <p class="hint">Aucun trip. Crée-en un ou importe un fichier JSON depuis la sub-section Données après création.</p>
+      {/if}
+      {#each appState.trips as t, idx (t.id)}
+        {@const isActive = appState.activeTrip === t.id}
+        {@const stopsTotal = t.zones.reduce((sum, z) => sum + z.stops.length, 0)}
+        <div class="trip-row" class:active={isActive}>
+          <button class="trip-row-tap" onclick={() => setActiveTrip(t.id)}>
+            <span class="zone-dot" style="background:{getTripColor(t, idx)}"></span>
+            <span class="trip-info">
+              <span class="item-name">{t.name}</span>
+              <span class="item-meta">{stopsTotal} stops · {t.visited.length} visités{isActive ? ' · actif' : ''}</span>
+            </span>
+          </button>
+          <button class="btn-icon" aria-label="Renommer" onclick={() => openTripForm(t)}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3 21 8 8 21H3v-5L16 3Z"/><path d="m13 6 5 5"/></svg>
+          </button>
+          <button class="btn-icon" aria-label="Dupliquer" onclick={() => handleDuplicate(t.id)}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
+          </button>
+          <button class="btn-icon btn-icon-danger" aria-label="Supprimer" onclick={() => handleDeleteTrip(t)}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+          </button>
+        </div>
+      {/each}
+      {#if showTripForm}
+        <div class="form-overlay">
+          <div class="form-card">
+            <h3>{editingTripId ? 'Renommer trip' : 'Nouveau trip'}</h3>
+            <label>Nom<input bind:value={tripFormName} placeholder="Montréal" /></label>
+            <label>Couleur d'accent<input type="color" bind:value={tripFormColor} /></label>
+            <div class="form-actions">
+              <button class="btn-primary" onclick={saveTripForm}>Enregistrer</button>
+              <button class="btn-secondary" onclick={() => (showTripForm = false)}>Annuler</button>
+            </div>
+          </div>
+        </div>
+      {/if}
+
+    {:else if activeSubTab === 'zones'}
       <button class="btn-add" onclick={() => openZoneForm()}>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
         Nouvelle zone
@@ -337,6 +437,37 @@
     color: var(--ink);
     border-bottom-color: var(--accent);
   }
+  .sub-tabs button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  .trip-row {
+    display: flex; align-items: center; gap: 8px;
+    border-bottom: 1px solid var(--line);
+    padding-right: 0;
+  }
+  .trip-row.active {
+    background: rgba(22,20,19,0.03);
+  }
+  .trip-row-tap {
+    flex: 1;
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 0;
+    background: none; border: none;
+    cursor: pointer;
+    text-align: left;
+    overflow: hidden;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .trip-info {
+    flex: 1;
+    display: flex; flex-direction: column;
+    gap: 2px;
+    overflow: hidden;
+  }
+  .trip-info .item-name { font-size: 15px; }
+  .trip-info .item-meta { font-size: 9px; }
   .tab-content { flex: 1; overflow-y: auto; padding: 16px 18px; }
 
   .btn-add {

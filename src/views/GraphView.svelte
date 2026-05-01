@@ -3,6 +3,7 @@
   import type { Stop, Zone } from '../lib/types'
   import GraphStop from '../components/GraphStop.svelte'
   import StopBottomSheet from '../components/StopBottomSheet.svelte'
+  import EmptyTripsState from '../components/EmptyTripsState.svelte'
 
   const trip = $derived(activeTripStore())
   let selectedZoneId = $state<string | null>(null)
@@ -31,9 +32,11 @@
   }
 </script>
 
+{#if !trip}
+  <EmptyTripsState />
+{:else}
 <div class="graph-view">
-  {#if trip}
-    <div class="zone-picker">
+  <div class="zone-picker">
       {#each trip.zones as zone}
         <button
           class="zone-chip"
@@ -43,7 +46,6 @@
         >{zone.name}</button>
       {/each}
     </div>
-  {/if}
 
   <div class="graph-body">
     {#if activeZone}
@@ -68,6 +70,7 @@
     {/if}
   </div>
 </div>
+{/if}
 
 {#if selectedStop}
   <StopBottomSheet stop={selectedStop} zoneColor={selectedZoneColor} zoneName={selectedZoneName} userLat={null} userLng={null} onClose={() => (selectedStop = null)} />

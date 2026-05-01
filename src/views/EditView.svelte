@@ -114,6 +114,7 @@
 
   // Stop form
   let selectedEditZoneId = $state<string | null>(null)
+  let stopFilter = $state('')
   let showStopForm = $state(false)
   let editingStop = $state<Stop | null>(null)
   let stopForm = $state({
@@ -341,22 +342,18 @@
 
     {:else if activeSubTab === 'stops'}
       {#if trip}
-        <div class="zone-filter">
-          {#each trip.zones as zone}
-            <button class="zone-chip" class:active={selectedEditZoneId === zone.id} style="--zone-color:{zone.color}" onclick={() => (selectedEditZoneId = zone.id)}>{zone.name}</button>
-          {/each}
-        </div>
-        {#if selectedEditZoneId}
-          {@const zone = trip.zones.find(z => z.id === selectedEditZoneId)}
-          {#if zone}
-            <button class="btn-add" onclick={() => openStopForm(zone.id)}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
-              Nouveau stop
-            </button>
-            {#each zone.stops as stop}
+        <input class="stop-search" type="search" placeholder="Rechercher un stop…" bind:value={stopFilter} />
+        {#if stopFilter.trim()}
+          {@const q = stopFilter.trim().toLowerCase()}
+          {@const matches = trip.zones.flatMap(z => z.stops.filter(s => s.name.toLowerCase().includes(q) || s.desc.toLowerCase().includes(q)).map(s => ({ stop: s, zone: z })))}
+          {#if matches.length === 0}
+            <p class="hint">Aucun stop ne correspond à « {stopFilter} ».</p>
+          {:else}
+            <p class="hint">{matches.length} résultat{matches.length > 1 ? 's' : ''}</p>
+            {#each matches as { stop, zone }}
               <div class="list-item">
                 <span class="item-name">{stop.name}</span>
-                <span class="item-meta">{stop.lat.toFixed(4)}, {stop.lng.toFixed(4)}</span>
+                <span class="item-meta" style="color:{zone.color}">{zone.name}</span>
                 <button class="btn-icon" aria-label="Modifier" onclick={() => openStopForm(zone.id, stop)}>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3 21 8 8 21H3v-5L16 3Z"/><path d="m13 6 5 5"/></svg>
                 </button>
@@ -367,7 +364,34 @@
             {/each}
           {/if}
         {:else}
-          <p class="hint">Sélectionne une zone ci-dessus.</p>
+          <div class="zone-filter">
+            {#each trip.zones as zone}
+              <button class="zone-chip" class:active={selectedEditZoneId === zone.id} style="--zone-color:{zone.color}" onclick={() => (selectedEditZoneId = zone.id)}>{zone.name}</button>
+            {/each}
+          </div>
+          {#if selectedEditZoneId}
+            {@const zone = trip.zones.find(z => z.id === selectedEditZoneId)}
+            {#if zone}
+              <button class="btn-add" onclick={() => openStopForm(zone.id)}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+                Nouveau stop
+              </button>
+              {#each zone.stops as stop}
+                <div class="list-item">
+                  <span class="item-name">{stop.name}</span>
+                  <span class="item-meta">{stop.lat.toFixed(4)}, {stop.lng.toFixed(4)}</span>
+                  <button class="btn-icon" aria-label="Modifier" onclick={() => openStopForm(zone.id, stop)}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3 21 8 8 21H3v-5L16 3Z"/><path d="m13 6 5 5"/></svg>
+                  </button>
+                  <button class="btn-icon btn-icon-danger" aria-label="Supprimer" onclick={() => removeStop(zone.id, stop.id)}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+                  </button>
+                </div>
+              {/each}
+            {/if}
+          {:else}
+            <p class="hint">Sélectionne une zone ci-dessus.</p>
+          {/if}
         {/if}
       {/if}
       {#if showStopForm}
@@ -660,6 +684,13 @@
   }
   .form-actions { display: flex; gap: 10px; margin-top: 6px; }
 
+  .stop-search {
+    width: 100%; box-sizing: border-box;
+    padding: 8px 12px; margin-bottom: 12px;
+    border: 1px solid #d4d4d4; border-radius: 8px;
+    font: inherit; font-size: 14px;
+  }
+  .stop-search:focus { outline: none; border-color: #888; }
   .zone-filter { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; }
   .zone-chip {
     padding: 5px 11px 6px;

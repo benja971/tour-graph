@@ -273,8 +273,9 @@
         </div>
       {/each}
       {#if showTripForm}
-        <div class="form-overlay">
-          <div class="form-card">
+        <!-- svelte-ignore a11y_click_events_have_key_events -->
+        <div class="form-overlay" onclick={() => (showTripForm = false)} role="presentation">
+          <div class="form-card" onclick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-label={editingTripId ? 'Renommer trip' : 'Nouveau trip'} tabindex="-1">
             <h3>{editingTripId ? 'Renommer trip' : 'Nouveau trip'}</h3>
             <label>Nom<input bind:value={tripFormName} placeholder="Montréal" /></label>
             <label>Couleur d'accent<input type="color" bind:value={tripFormColor} /></label>
@@ -307,8 +308,9 @@
         {/each}
       {/if}
       {#if showZoneForm}
-        <div class="form-overlay">
-          <div class="form-card">
+        <!-- svelte-ignore a11y_click_events_have_key_events -->
+        <div class="form-overlay" onclick={() => (showZoneForm = false)} role="presentation">
+          <div class="form-card" onclick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-label={editingZone ? 'Modifier zone' : 'Nouvelle zone'} tabindex="-1">
             <h3>{editingZone ? 'Modifier zone' : 'Nouvelle zone'}</h3>
             <label>Nom<input bind:value={zoneFormName} placeholder="Brooklyn Sud" /></label>
             <label>Couleur<input type="color" bind:value={zoneFormColor} /></label>
@@ -352,8 +354,9 @@
         {/if}
       {/if}
       {#if showStopForm}
-        <div class="form-overlay">
-          <div class="form-card form-card-scroll">
+        <!-- svelte-ignore a11y_click_events_have_key_events -->
+        <div class="form-overlay" onclick={() => (showStopForm = false)} role="presentation">
+          <div class="form-card form-card-scroll" onclick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-label={editingStop ? 'Modifier stop' : 'Nouveau stop'} tabindex="-1">
             <h3>{editingStop ? 'Modifier stop' : 'Nouveau stop'}</h3>
             <label>Nom *<input bind:value={stopForm.name} placeholder="Smorgasburg" /></label>
             <label>Description<textarea bind:value={stopForm.desc} rows="3"></textarea></label>

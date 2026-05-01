@@ -53,9 +53,12 @@
   </div>
 </div>
 
+<svelte:window onkeydown={(e) => { if (showForm && e.key === 'Escape') showForm = false }} />
+
 {#if showForm}
-  <div class="form-overlay">
-    <div class="form-card">
+  <!-- svelte-ignore a11y_click_events_have_key_events -->
+  <div class="form-overlay" onclick={() => (showForm = false)} role="presentation">
+    <div class="form-card" onclick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-label="Nouveau trip" tabindex="-1">
       <h3>Nouveau trip</h3>
       <label>Nom<input bind:value={formName} placeholder="Montréal" /></label>
       <label>Couleur d'accent<input type="color" bind:value={formColor} /></label>
